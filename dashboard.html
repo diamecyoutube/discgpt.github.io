@@ -50,9 +50,16 @@
                         </span>
                         <span id="status-text" class="text-[9px] text-gray-400 uppercase font-bold tracking-widest">Checking Bridge...</span>
                     </div>
-                    <p id="mixed-content-warning" class="hidden text-[8px] text-gray-500 max-w-[200px] leading-tight">
-                        Note: If "Link Blocked" appears, click the browser padlock icon -> Site Settings -> Allow "Insecure Content".
-                    </p>
+                    
+                    <!-- Firefox Specific Help -->
+                    <div id="mixed-content-warning" class="hidden glass p-4 rounded-xl mt-4 max-w-[280px]">
+                        <p class="text-[10px] text-red-400 font-bold mb-2 uppercase tracking-tight">Firefox Security Blocked Connection</p>
+                        <p class="text-[9px] text-gray-400 leading-relaxed text-left">
+                            1. Click the <span class="text-white font-bold">Shield Icon</span> 🛡️ to the left of the URL bar.<br>
+                            2. Toggle <span class="text-white font-bold">"Enhanced Tracking Protection"</span> to OFF.<br>
+                            3. If that fails, click the padlock -> "Connection secure" -> "More information" -> "Permissions" -> Unblock Insecure Content.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
