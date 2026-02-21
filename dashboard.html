@@ -10,27 +10,38 @@
         body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
         .glass { background: rgba(15, 17, 23, 0.8); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.05); }
         .input-dark { background: #1a1d24; border: 1px solid rgba(255,255,255,0.08); transition: all 0.2s; }
-        .input-dark:focus { border-color: #6366f1; box-shadow: 0 0 10px rgba(99, 102, 241, 0.2); }
+        .input-dark:focus:not(:disabled) { border-color: #6366f1; box-shadow: 0 0 10px rgba(99, 102, 241, 0.2); }
+        .input-dark:disabled { cursor: not-allowed; opacity: 0.6; }
         .category-tab.active { background: #6366f1; color: white; border-color: #6366f1; }
         .premium-text { background: linear-gradient(90deg, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
         .unlimited-text { background: linear-gradient(90deg, #f472b6, #fbbf24); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
         .ai-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+        
+        /* Custom Scrollbar for a cleaner look */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f1117; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
     </style>
 </head>
 <body class="bg-[#050608] text-gray-200 min-h-screen">
 
     <!-- LOGIN -->
     <div id="loginPage" class="flex items-center justify-center min-h-screen p-6">
-        <div class="glass p-10 rounded-3xl shadow-2xl w-full max-w-md border-indigo-500/20 border text-center">
-            <h2 class="text-4xl font-black mb-1 italic text-indigo-500">discGPT</h2>
-            <p class="text-[9px] text-gray-500 mb-8 uppercase tracking-[0.4em]">Neural Interface v3.0</p>
-            <div class="space-y-4 text-left">
+        <div class="glass p-10 rounded-3xl shadow-2xl w-full max-w-md border-indigo-500/20 border text-center relative overflow-hidden">
+            <div class="absolute top-[-50px] left-[-50px] w-32 h-32 bg-indigo-600/20 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-[-50px] right-[-50px] w-32 h-32 bg-purple-600/20 rounded-full blur-3xl"></div>
+            
+            <h2 class="text-4xl font-black mb-1 italic text-indigo-500 relative z-10">discGPT</h2>
+            <p class="text-[9px] text-gray-500 mb-8 uppercase tracking-[0.4em] relative z-10">Neural Interface v3.5</p>
+            
+            <div class="space-y-4 text-left relative z-10">
                 <label class="text-[10px] font-bold text-gray-600 uppercase tracking-widest ml-1">Access Credentials</label>
                 <input type="password" id="keyInput" placeholder="•••• •••• ••••" class="w-full input-dark p-4 rounded-xl text-center font-mono tracking-widest outline-none">
-                <button onclick="login()" id="loginBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 py-4 rounded-xl font-black transition-all active:scale-95 shadow-lg shadow-indigo-600/20">INITIATE NEURAL LINK</button>
+                <button onclick="login()" id="loginBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 py-4 rounded-xl font-black transition-all active:scale-95 shadow-lg shadow-indigo-600/20 text-white">INITIATE NEURAL LINK</button>
             </div>
-            <div id="loginError" class="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-xs text-red-400 hidden"></div>
+            <div id="loginError" class="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-xs text-red-400 hidden relative z-10 font-bold"></div>
         </div>
     </div>
 
@@ -52,28 +63,32 @@
 
         <!-- ADMIN SECTION -->
         <section id="adminPanel" class="hidden mb-10">
-            <div class="glass p-6 rounded-2xl border-red-500/20 border bg-red-500/5">
-                <h3 class="text-red-500 font-black text-xs tracking-widest uppercase mb-4">Root Overrides</h3>
+            <div class="glass p-6 rounded-2xl border-red-500/20 border bg-red-500/5 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
+                <h3 class="text-red-500 font-black text-xs tracking-widest uppercase mb-4">Root Overrides (Admin Only)</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <input type="text" id="guildId" placeholder="Cluster ID (Server ID)" class="input-dark p-3 rounded-lg outline-none text-sm">
-                    <select id="tierSelect" class="input-dark p-3 rounded-lg outline-none text-sm">
+                    <input type="text" id="guildId" placeholder="Target Server ID" class="input-dark p-3 rounded-lg outline-none text-sm font-mono">
+                    <select id="tierSelect" class="input-dark p-3 rounded-lg outline-none text-sm font-bold">
                         <option value="Free">Free Baseline</option>
                         <option value="Plus">discGPT Plus</option>
                         <option value="Unlimited">discGPT Unlimited</option>
                     </select>
-                    <button onclick="updateGuildSettings(true)" id="adminUpdateBtn" class="bg-red-600 hover:bg-red-700 rounded-lg font-bold text-xs transition text-white">FORCE UPDATE TIER</button>
+                    <button onclick="updateGuildSettings(true)" id="adminUpdateBtn" class="bg-red-600 hover:bg-red-700 rounded-lg font-bold text-xs transition text-white shadow-lg shadow-red-600/20">FORCE UPDATE TIER</button>
                 </div>
             </div>
         </section>
 
         <main class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <!-- SERVERS -->
+            <!-- SERVERS LIST -->
             <aside class="space-y-4">
-                <h2 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Neural Clusters</h2>
-                <div id="guildList" class="space-y-2"></div>
+                <h2 class="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center justify-between">
+                    <span>Neural Clusters</span>
+                    <span id="serverCount" class="bg-white/10 px-2 py-0.5 rounded-md text-gray-300">0</span>
+                </h2>
+                <div id="guildList" class="space-y-2 max-h-[600px] overflow-y-auto pr-2"></div>
             </aside>
 
-            <!-- CONFIGURATION -->
+            <!-- CONFIGURATION PANEL -->
             <section class="lg:col-span-3">
                 <div id="settingsPlaceholder" class="glass h-[500px] flex items-center justify-center rounded-3xl border-dashed border-2 border-white/5">
                     <div class="text-center opacity-30">
@@ -82,28 +97,30 @@
                     </div>
                 </div>
 
-                <div id="settingsPanel" class="hidden glass p-8 rounded-3xl space-y-8 animate-in slide-in-from-bottom duration-500">
+                <div id="settingsPanel" class="hidden glass p-8 rounded-3xl space-y-8 animate-in slide-in-from-bottom duration-500 relative overflow-hidden">
+                    <div id="tierBanner" class="absolute top-0 left-0 w-full h-1 bg-gray-600"></div>
+
                     <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/5 pb-8">
                         <div class="flex items-center gap-4">
                             <img id="activeIcon" src="" class="w-16 h-16 rounded-2xl border border-white/10 shadow-2xl">
                             <div>
                                 <h2 id="activeName" class="text-2xl font-black italic text-white">Server Name</h2>
-                                <span id="activeTier" class="premium-text text-[10px] uppercase tracking-tighter">Tier</span>
+                                <span id="activeTier" class="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded bg-white/10 text-gray-300">Free Tier</span>
                             </div>
                         </div>
                         <nav id="categoryNav" class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                             <button onclick="switchCategory('ai')" class="category-tab active px-4 py-2 rounded-xl text-[10px] font-black border border-white/5 transition whitespace-nowrap">AI CORE</button>
-                            <button onclick="switchCategory('mod')" class="category-tab px-4 py-2 rounded-xl text-[10px] font-black border border-white/5 transition whitespace-nowrap">SECURITY</button>
-                            <button onclick="switchCategory('unlim')" class="category-tab px-4 py-2 rounded-xl text-[10px] font-black border border-white/5 transition whitespace-nowrap">UNLIMITED ONLY</button>
-                            <button onclick="switchCategory('sub')" class="category-tab px-4 py-2 rounded-xl text-[10px] font-black border border-white/5 transition whitespace-nowrap">SUBSCRIPTION</button>
+                            <button onclick="switchCategory('mod')" class="category-tab px-4 py-2 rounded-xl text-[10px] font-black border border-white/5 transition whitespace-nowrap">MODERATION</button>
+                            <button onclick="switchCategory('unlim')" class="category-tab px-4 py-2 rounded-xl text-[10px] font-black border border-white/5 transition whitespace-nowrap">UNLIMITED</button>
+                            <button onclick="switchCategory('sub')" class="category-tab px-4 py-2 rounded-xl text-[10px] font-black border border-white/5 transition whitespace-nowrap">PLAN DETAILS</button>
                         </nav>
                     </div>
 
-                    <div id="categoryContent" class="grid grid-cols-1 md:grid-cols-2 gap-8"></div>
+                    <div id="categoryContent" class="grid grid-cols-1 md:grid-cols-2 gap-8 min-h-[250px] items-start"></div>
 
                     <div class="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center gap-4">
-                        <button onclick="updateGuildSettings(false)" id="saveBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 py-4 rounded-xl font-black shadow-lg shadow-indigo-600/20 transition-all active:scale-95">SAVE NEURAL CONFIG</button>
-                        <p id="saveStatus" class="text-xs font-bold whitespace-nowrap"></p>
+                        <button onclick="updateGuildSettings(false)" id="saveBtn" class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 px-8 py-4 rounded-xl font-black shadow-lg shadow-indigo-600/20 transition-all active:scale-95 text-white">SAVE NEURAL CONFIG</button>
+                        <p id="saveStatus" class="text-xs font-bold whitespace-nowrap text-gray-400"></p>
                     </div>
                 </div>
             </section>
@@ -111,64 +128,72 @@
     </div>
 
     <!-- AI PLAYGROUND -->
-    <div id="aiModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4">
-        <div class="glass w-full max-w-2xl h-[600px] rounded-3xl flex flex-col overflow-hidden border-indigo-500/30 border">
+    <div id="aiModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm">
+        <div class="glass w-full max-w-2xl h-[600px] rounded-3xl flex flex-col overflow-hidden border-indigo-500/30 border shadow-2xl">
             <div class="p-6 border-b border-white/5 flex justify-between items-center bg-indigo-600/5">
-                <h3 class="font-black italic text-indigo-400">NEURAL TESTBED</h3>
-                <button onclick="closeAIPlayground()" class="text-gray-500 hover:text-white">&times;</button>
+                <h3 class="font-black italic text-indigo-400 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    NEURAL TESTBED
+                </h3>
+                <button onclick="closeAIPlayground()" class="text-gray-500 hover:text-white transition bg-white/5 hover:bg-white/10 p-2 rounded-lg">&times;</button>
             </div>
-            <div id="chatBox" class="flex-1 p-6 overflow-y-auto space-y-4 text-sm font-medium">
-                <div class="bg-white/5 p-4 rounded-2xl max-w-[80%]">System: Neural link active. Model: Gemini-1.5-Flash. Ready for input.</div>
+            <div id="chatBox" class="flex-1 p-6 overflow-y-auto space-y-4 text-sm font-medium flex flex-col">
+                <div class="bg-indigo-600/20 text-indigo-200 p-4 rounded-2xl max-w-[80%] self-start border border-indigo-500/20">
+                    System: Neural link active. Ready to simulate AI responses based on current configurations.
+                </div>
             </div>
-            <div class="p-4 bg-white/5 border-t border-white/5 flex gap-2">
+            <div class="p-4 bg-[#0a0c10] border-t border-white/5 flex gap-2">
                 <input type="text" id="aiInput" placeholder="Send a neural pulse..." class="flex-1 input-dark p-4 rounded-xl outline-none" onkeypress="if(event.key==='Enter') sendAIMessage()">
-                <button onclick="sendAIMessage()" id="sendBtn" class="bg-indigo-600 px-6 rounded-xl font-bold">SEND</button>
+                <button onclick="sendAIMessage()" id="sendBtn" class="bg-indigo-600 hover:bg-indigo-700 transition px-6 rounded-xl font-bold text-white shadow-lg shadow-indigo-600/20">SEND</button>
             </div>
         </div>
     </div>
 
-    <!-- PREMIUM LOCK -->
-    <div id="premiumModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-        <div class="glass p-8 rounded-3xl max-w-sm w-full text-center border-indigo-500/40 border">
-            <div class="w-20 h-20 bg-indigo-600/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+    <!-- PREMIUM LOCK MODAL -->
+    <div id="premiumModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
+        <div class="glass p-8 rounded-3xl max-w-sm w-full text-center border-indigo-500/40 border shadow-2xl relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-b from-indigo-600/10 to-transparent pointer-events-none"></div>
+            <div class="w-20 h-20 bg-indigo-600/20 rounded-full flex items-center justify-center mx-auto mb-6 relative z-10 border border-indigo-500/30">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
             </div>
-            <h3 class="text-2xl font-black italic mb-2">Neural Tier Restricted</h3>
-            <p id="lockMsg" class="text-gray-400 text-sm mb-8 leading-relaxed">This function requires an upgraded neural tier.</p>
-            <div class="space-y-3">
-                <button onclick="window.open('https://discord.gg/discgpt')" class="w-full bg-indigo-600 py-4 rounded-xl font-bold">UPGRADE NOW</button>
-                <button onclick="document.getElementById('premiumModal').classList.add('hidden')" class="w-full py-2 text-gray-500 text-xs font-bold uppercase tracking-widest">Dismiss</button>
+            <h3 class="text-2xl font-black italic mb-2 text-white relative z-10">Tier Restricted</h3>
+            <p id="lockMsg" class="text-gray-400 text-sm mb-8 leading-relaxed relative z-10">This function requires an upgraded neural tier.</p>
+            <div class="space-y-3 relative z-10">
+                <button onclick="window.open('https://discord.gg/discgpt')" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 py-4 rounded-xl font-black text-white shadow-lg transition-all active:scale-95">UPGRADE PLAN</button>
+                <button onclick="document.getElementById('premiumModal').classList.add('hidden')" class="w-full py-2 text-gray-500 hover:text-white transition text-xs font-bold uppercase tracking-widest">Dismiss</button>
             </div>
         </div>
     </div>
 
     <script>
+        // --- API CONFIGURATION ---
         const BOT_URL = "http://fi13.bot-hosting.cloud:21187";
         const API_KEY = "bohNFcIumG0hWxp6E8l8b08nubQklL1GURibpKLtAVpUpslFzn";
-        // Fixed Gemini URL to use 1.5-flash which is effectively 'latest' in the preview env
         const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=";
-        const apiKey = ""; // Provided by env at runtime
+        const apiKey = ""; // Runtime populated in environments if needed
 
         let curPass = "";
         let selectedGuild = null;
         let guildsData = [];
         let activeCategory = 'ai';
 
-        const config = {
+        // --- FEATURE CONFIGURATION MAP ---
+        // Aligns precisely with the bot.js capabilities and premium locks
+        const configMap = {
             'ai': {
                 fields: [
-                    { id: 'engine', label: 'Primary Engine', type: 'select', opts: ['Gemini-1.5-Flash', 'Mistral-7B', 'Llama-3'], premium: false, default: 'Gemini-1.5-Flash' },
-                    { id: 'footerType', label: 'Neural Footer Style', type: 'select', opts: ['Ad (Default)', 'Disabled', 'Custom Text'], premium: true, default: 'Ad (Default)' },
-                    { id: 'customFooter', label: 'Custom Footer Text', type: 'text', premium: true, default: '' },
-                    { id: 'embedOnly', label: 'Force Neural Embeds', type: 'toggle', premium: false, default: true }
+                    { id: 'engine', label: 'Primary LLM Engine', type: 'select', opts: ['Gemini-1.5-Flash', 'Mistral-7B', 'Llama-3', 'Groq'], premium: false, default: 'Gemini-1.5-Flash' },
+                    { id: 'embedOnly', label: 'Force Neural Embeds', type: 'toggle', premium: false, default: true },
+                    { id: 'footerType', label: 'Embed Footer Style', type: 'select', opts: ['Ad (Default)', 'Disabled', 'Custom Text'], premium: true, default: 'Ad (Default)' },
+                    { id: 'customFooter', label: 'Custom Footer Text', type: 'text', premium: true, default: '' }
                 ]
             },
             'mod': {
                 fields: [
-                    { id: 'logCh', label: 'Security Log Channel', type: 'text', premium: false, default: '' },
-                    { id: 'kick', label: 'Slash /kick', type: 'toggle', premium: false, default: true },
-                    { id: 'context', label: 'AI Contextual Analysis', type: 'toggle', premium: true, default: false },
-                    { id: 'tox', label: 'Neural Toxicity Filter', type: 'toggle', premium: true, default: false }
+                    { id: 'logCh', label: 'Security Log Channel ID', type: 'text', premium: false, default: '' },
+                    { id: 'kick', label: 'Enable /kick Command', type: 'toggle', premium: false, default: true },
+                    { id: 'ban', label: 'Enable /ban Command', type: 'toggle', premium: false, default: true },
+                    { id: 'tox', label: 'AI Toxicity & Scam Filter', type: 'toggle', premium: true, default: false }
                 ]
             },
             'unlim': {
@@ -176,21 +201,25 @@
                     { id: 'voiceTranscription', label: 'Real-time Voice Transcribe', type: 'toggle', unlim: true, default: false },
                     { id: 'imageGen', label: 'Neural Image Generation', type: 'toggle', unlim: true, default: false },
                     { id: 'memory', label: 'Persistent Server Memory', type: 'toggle', unlim: true, default: false },
-                    { id: 'whiteLabel', label: 'Total White Labeling', type: 'toggle', unlim: true, default: false },
-                    { id: 'apiAccess', label: 'External API Neural Bridge', type: 'toggle', unlim: true, default: false }
+                    { id: 'whiteLabel', label: 'Complete White Labeling', type: 'toggle', unlim: true, default: false },
+                    { id: 'apiAccess', label: 'External API JSON Bridge', type: 'toggle', unlim: true, default: false }
                 ]
             },
             'sub': {
                 fields: [
-                    { id: 'status', label: 'Current Tier Status', type: 'text', premium: false, readonly: true, default: 'Free Baseline' }
+                    { id: 'statusInfo', label: 'Current Plan Overview', type: 'info', default: 'Select a tier below for info.' }
                 ]
             }
         };
 
+        // --- AUTHENTICATION ---
         function login() {
             const pass = document.getElementById('keyInput').value;
             const btn = document.getElementById('loginBtn');
-            btn.innerText = "LINKING NEURONS...";
+            const err = document.getElementById('loginError');
+            
+            btn.innerText = "AUTHENTICATING...";
+            err.classList.add('hidden');
             
             fetch(`${BOT_URL}/auth?key=${API_KEY}&pass=${pass}&t=${Date.now()}`)
                 .then(r => r.json())
@@ -199,41 +228,86 @@
                         curPass = pass;
                         document.getElementById('loginPage').classList.add('hidden');
                         document.getElementById('dashPage').classList.remove('hidden');
-                        document.getElementById('userLabel').innerText = data.type === 'admin' ? "ROOT INTERFACE" : "OPERATOR INTERFACE";
-                        if(data.type === 'admin') document.getElementById('adminPanel').classList.remove('hidden');
+                        document.getElementById('userLabel').innerText = data.type === 'admin' ? "ROOT INTERFACE" : `WELCOME, ${data.username || 'OPERATOR'}`;
+                        
+                        if(data.type === 'admin') {
+                            document.getElementById('adminPanel').classList.remove('hidden');
+                        }
                         loadGuilds();
-                    } else throw "Invalid";
+                    } else throw new Error("Invalid Credentials");
                 })
-                .catch(() => {
-                    const err = document.getElementById('loginError');
+                .catch((e) => {
                     err.innerText = "NEURAL LINK REFUSED: UNAUTHORIZED ACCESS KEY";
                     err.classList.remove('hidden');
                     btn.innerText = "RETRY INTERFACE";
                 });
         }
 
+        // --- DATA LOADING ---
         async function loadGuilds() {
-            const r = await fetch(`${BOT_URL}/user/guilds?key=${API_KEY}&pass=${curPass}`);
-            guildsData = await r.json();
-            const list = document.getElementById('guildList');
-            list.innerHTML = guildsData.map(g => `
-                <div onclick="selectGuild('${g.id}')" class="glass p-3 rounded-xl flex items-center gap-3 cursor-pointer hover:bg-white/10 transition border border-transparent hover:border-indigo-500/30">
-                    <img src="${g.icon || 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-8 h-8 rounded-lg">
-                    <div class="flex-1 overflow-hidden">
-                        <p class="text-[11px] font-black truncate text-white">${g.name}</p>
-                        <p class="text-[8px] text-gray-500 uppercase tracking-widest">${g.settings.tier || 'Free'}</p>
+            try {
+                const r = await fetch(`${BOT_URL}/user/guilds?key=${API_KEY}&pass=${curPass}`);
+                guildsData = await r.json();
+                
+                document.getElementById('serverCount').innerText = guildsData.length;
+                const list = document.getElementById('guildList');
+                
+                if(guildsData.length === 0) {
+                    list.innerHTML = `<p class="text-xs text-gray-500 italic p-4 text-center border border-dashed border-white/5 rounded-xl">No active neural clusters detected for this key.</p>`;
+                    return;
+                }
+
+                list.innerHTML = guildsData.map(g => {
+                    const tier = g.settings.tier || 'Free';
+                    let badgeColor = 'bg-gray-600';
+                    if (tier === 'Plus') badgeColor = 'bg-indigo-500';
+                    if (tier === 'Unlimited') badgeColor = 'bg-pink-500';
+
+                    return `
+                    <div onclick="selectGuild('${g.id}')" class="glass p-3 rounded-xl flex items-center gap-3 cursor-pointer hover:bg-white/10 transition border border-transparent hover:border-indigo-500/30 group">
+                        <div class="relative">
+                            <img src="${g.icon || 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-10 h-10 rounded-lg shadow-md group-hover:scale-105 transition">
+                            <div class="absolute -bottom-1 -right-1 w-3 h-3 ${badgeColor} rounded-full border-2 border-[#050608]"></div>
+                        </div>
+                        <div class="flex-1 overflow-hidden">
+                            <p class="text-[12px] font-black truncate text-white">${g.name}</p>
+                            <p class="text-[9px] text-gray-400 uppercase tracking-widest">${g.id}</p>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `}).join('');
+            } catch (err) {
+                console.error("Error loading guilds:", err);
+            }
         }
 
+        // --- UI UPDATES ---
         function selectGuild(id) {
             selectedGuild = guildsData.find(g => g.id === id);
+            
             document.getElementById('settingsPlaceholder').classList.add('hidden');
             document.getElementById('settingsPanel').classList.remove('hidden');
+            
             document.getElementById('activeIcon').src = selectedGuild.icon || 'https://cdn.discordapp.com/embed/avatars/0.png';
             document.getElementById('activeName').innerText = selectedGuild.name;
-            document.getElementById('activeTier').innerText = selectedGuild.settings.tier || 'Free';
+            
+            const tier = selectedGuild.settings.tier || 'Free';
+            const tierBadge = document.getElementById('activeTier');
+            const tierBanner = document.getElementById('tierBanner');
+            
+            tierBadge.innerText = `${tier} Tier`;
+            tierBadge.className = "text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded text-white shadow-sm ";
+            
+            if(tier === 'Unlimited') {
+                tierBadge.classList.add('bg-gradient-to-r', 'from-pink-500', 'to-yellow-500');
+                tierBanner.className = "absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-pink-500 to-yellow-500";
+            } else if (tier === 'Plus') {
+                tierBadge.classList.add('bg-gradient-to-r', 'from-indigo-500', 'to-purple-500');
+                tierBanner.className = "absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500";
+            } else {
+                tierBadge.classList.add('bg-gray-600');
+                tierBanner.className = "absolute top-0 left-0 w-full h-1 bg-gray-600";
+            }
+
             switchCategory('ai');
         }
 
@@ -243,80 +317,148 @@
                 b.classList.remove('active');
                 if(b.innerText.toLowerCase().includes(cat.substring(0,3))) b.classList.add('active');
             });
-            render();
+            renderCategory();
         }
 
-        function render() {
+        function renderCategory() {
             const tier = selectedGuild.settings.tier || 'Free';
             const isPlus = tier === 'Plus' || tier === 'Unlimited';
             const isUnlim = tier === 'Unlimited';
             
             const container = document.getElementById('categoryContent');
-            container.innerHTML = config[activeCategory].fields.map(f => {
-                const lock = (f.premium && !isPlus) || (f.unlim && !isUnlim);
-                const lockType = (f.unlim) ? 'UNLIMITED' : 'PLUS';
+            
+            if (activeCategory === 'sub') {
+                container.innerHTML = `
+                    <div class="col-span-full space-y-4">
+                        <div class="p-6 rounded-2xl border ${tier === 'Free' ? 'border-gray-500 bg-gray-500/10' : 'border-white/5 bg-white/5'}">
+                            <h4 class="font-black text-gray-300">Free Baseline</h4>
+                            <p class="text-xs text-gray-500 mt-2">Core LLMs, standard embeds, community support, forced ad footers.</p>
+                        </div>
+                        <div class="p-6 rounded-2xl border ${tier === 'Plus' ? 'border-indigo-500 bg-indigo-500/10' : 'border-white/5 bg-white/5'}">
+                            <h4 class="font-black premium-text">discGPT Plus</h4>
+                            <p class="text-xs text-gray-500 mt-2">Custom footers, Toxicity filter, faster priority queue, extended AI context.</p>
+                        </div>
+                        <div class="p-6 rounded-2xl border ${tier === 'Unlimited' ? 'border-pink-500 bg-pink-500/10' : 'border-white/5 bg-white/5'}">
+                            <h4 class="font-black unlimited-text">discGPT Unlimited</h4>
+                            <p class="text-xs text-gray-500 mt-2">Image gen, voice transcribe, persistent server memory, external API connections, full white-labeling.</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = configMap[activeCategory].fields.map(f => {
+                const isLocked = (f.premium && !isPlus) || (f.unlim && !isUnlim);
+                const lockType = (f.unlim) ? 'Unlimited' : 'Plus';
                 
                 return `
-                    <div class="space-y-3 ${lock ? 'opacity-40 grayscale' : ''}" onclick="${lock ? `showPremiumLock('${lockType}')` : ''}">
-                        <label class="text-[9px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                            ${f.label} 
-                            ${f.premium ? '<span class="premium-text text-[8px]">[PLUS]</span>' : ''}
-                            ${f.unlim ? '<span class="unlimited-text text-[8px]">[UNLIMITED]</span>' : ''}
-                        </label>
-                        ${renderInput(f, lock)}
+                    <div class="space-y-2 p-4 rounded-2xl transition-all border border-transparent ${isLocked ? 'bg-white/5 opacity-60 hover:border-red-500/30 cursor-not-allowed' : 'bg-white/5 hover:border-indigo-500/30'}" 
+                         ${isLocked ? `onclick="showPremiumLock('${lockType}')"` : ''}>
+                        
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                ${f.label} 
+                                ${f.premium ? '<span class="px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-400 text-[8px] border border-indigo-500/20">PLUS</span>' : ''}
+                                ${f.unlim ? '<span class="px-1.5 py-0.5 rounded bg-pink-500/20 text-pink-400 text-[8px] border border-pink-500/20">UNLIMITED</span>' : ''}
+                            </label>
+                            ${isLocked ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" /></svg>' : ''}
+                        </div>
+                        ${renderInput(f, isLocked)}
                     </div>
                 `;
             }).join('');
         }
 
-        function renderInput(f, lock) {
+        function renderInput(f, isLocked) {
             const val = (selectedGuild.settings[f.id] !== undefined) ? selectedGuild.settings[f.id] : f.default;
-            const attr = lock ? 'disabled' : '';
-            if(f.type === 'select') return `<select id="${f.id}" ${attr} class="w-full input-dark p-3 rounded-xl text-xs font-bold">${f.opts.map(o => `<option ${val==o?'selected':''}>${o}</option>`).join('')}</select>`;
-            if(f.type === 'toggle') return `<div class="bg-white/5 p-3 rounded-xl flex justify-between items-center"><span class="text-[10px] text-gray-400 font-bold uppercase">Status</span><input type="checkbox" id="${f.id}" ${val ? 'checked' : ''} ${attr} class="w-5 h-5 accent-indigo-500"></div>`;
-            return `<input type="text" id="${f.id}" value="${val||''}" ${attr} class="w-full input-dark p-3 rounded-xl text-xs font-bold">`;
+            const attr = isLocked ? 'disabled' : '';
+            
+            if(f.type === 'select') {
+                return `<select id="${f.id}" ${attr} class="w-full input-dark p-3 rounded-xl text-xs font-bold text-gray-200 focus:outline-none">
+                            ${f.opts.map(o => `<option value="${o}" ${val===o?'selected':''}>${o}</option>`).join('')}
+                        </select>`;
+            }
+            if(f.type === 'toggle') {
+                return `<div class="flex items-center gap-3">
+                            <label class="relative inline-flex items-center ${isLocked ? 'cursor-not-allowed' : 'cursor-pointer'}">
+                                <input type="checkbox" id="${f.id}" ${val ? 'checked' : ''} ${attr} class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-500"></div>
+                            </label>
+                            <span class="text-xs font-bold text-gray-500">${val ? 'Enabled' : 'Disabled'}</span>
+                        </div>`;
+            }
+            return `<input type="text" id="${f.id}" value="${val||''}" ${attr} class="w-full input-dark p-3 rounded-xl text-xs font-bold text-gray-200 focus:outline-none" placeholder="Enter value...">`;
         }
 
         function showPremiumLock(tier) {
-            document.getElementById('lockMsg').innerText = `This is a high-level function restricted to discGPT ${tier} clusters. Upgrade to expand your neural capacity.`;
+            document.getElementById('lockMsg').innerText = `This is a high-level function strictly reserved for discGPT ${tier} clusters. Upgrade your plan to expand your neural capability and unlock this setting.`;
             document.getElementById('premiumModal').classList.remove('hidden');
         }
 
-        async function updateGuildSettings(force) {
-            const gid = force ? document.getElementById('guildId').value : selectedGuild.id;
-            const btn = force ? document.getElementById('adminUpdateBtn') : document.getElementById('saveBtn');
-            const status = force ? null : document.getElementById('saveStatus');
+        // --- DATA SAVING ---
+        async function updateGuildSettings(isAdminForce) {
+            const gid = isAdminForce ? document.getElementById('guildId').value : selectedGuild.id;
+            const btn = isAdminForce ? document.getElementById('adminUpdateBtn') : document.getElementById('saveBtn');
+            const statusEl = isAdminForce ? null : document.getElementById('saveStatus');
             
-            let s = {};
-            if(force) {
-                s = { tier: document.getElementById('tierSelect').value };
+            if (!gid) return alert("Target ID missing.");
+
+            let updates = {};
+            if(isAdminForce) {
+                updates = { tier: document.getElementById('tierSelect').value };
             } else {
-                Object.values(config).forEach(c => c.fields.forEach(f => {
+                // Collect values from the active tab form elements
+                // Note: We only update fields that are currently visible and editable
+                configMap[activeCategory].fields.forEach(f => {
                     const el = document.getElementById(f.id);
-                    if(el) s[f.id] = f.type==='toggle' ? el.checked : el.value;
-                    else s[f.id] = selectedGuild.settings[f.id];
-                }));
+                    if (el && !el.disabled) {
+                        updates[f.id] = f.type === 'toggle' ? el.checked : el.value;
+                    }
+                });
             }
 
             btn.disabled = true;
-            if(status) status.innerText = "UPLOADING CONFIG...";
-            
-            const r = await fetch(`${BOT_URL}/guild/update?key=${API_KEY}&pass=${curPass}&guild_id=${gid}&settings=${encodeURIComponent(JSON.stringify(s))}`);
-            const data = await r.json();
-            if(data.success) {
-                if(status) { status.innerText = "NEURAL SYNC COMPLETE"; status.className = "text-green-500 font-black text-xs"; }
-                loadGuilds();
+            const originalText = btn.innerText;
+            btn.innerText = "SYNCING...";
+            if(statusEl) { 
+                statusEl.innerText = "UPLOADING CONFIG..."; 
+                statusEl.className = "text-xs font-bold whitespace-nowrap text-yellow-500"; 
             }
+            
+            try {
+                const r = await fetch(`${BOT_URL}/guild/update?key=${API_KEY}&pass=${curPass}&guild_id=${gid}&settings=${encodeURIComponent(JSON.stringify(updates))}`);
+                const data = await r.json();
+                
+                if(data.success) {
+                    if(statusEl) { 
+                        statusEl.innerText = "NEURAL SYNC COMPLETE"; 
+                        statusEl.className = "text-green-500 font-black text-xs"; 
+                        setTimeout(() => statusEl.innerText = "", 3000);
+                    }
+                    // Refresh data in memory and UI
+                    await loadGuilds();
+                    if(!isAdminForce) selectGuild(gid); 
+                } else {
+                    throw new Error("API Rejected Update");
+                }
+            } catch (err) {
+                if(statusEl) {
+                    statusEl.innerText = "SYNC FAILED. CHECK CONNECTION.";
+                    statusEl.className = "text-red-500 font-black text-xs";
+                }
+            }
+            
             btn.disabled = false;
+            btn.innerText = originalText;
         }
 
-        // AI LOGIC
+        // --- AI TESTBED LOGIC ---
         function openAIPlayground() { document.getElementById('aiModal').classList.remove('hidden'); }
         function closeAIPlayground() { document.getElementById('aiModal').classList.add('hidden'); }
 
         async function callGemini(prompt) {
             let retries = 0;
-            const maxRetries = 5;
+            const maxRetries = 3;
             while(retries < maxRetries) {
                 try {
                     const response = await fetch(`${GEMINI_URL}${apiKey}`, {
@@ -324,7 +466,7 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             contents: [{ parts: [{ text: prompt }] }],
-                            systemInstruction: { parts: [{ text: "You are discGPT, a professional Discord Neural AI. Be concise and technical." }] }
+                            systemInstruction: { parts: [{ text: "You are discGPT, a professional Discord Neural AI testing interface. Answer concisely." }] }
                         })
                     });
                     const data = await response.json();
@@ -342,21 +484,34 @@
             const chat = document.getElementById('chatBox');
             if(!input.value.trim()) return;
 
-            chat.innerHTML += `<div class="bg-indigo-600/10 p-4 rounded-2xl ml-auto max-w-[80%] text-right border border-indigo-500/20">Operator: ${input.value}</div>`;
+            // Operator Message
+            chat.innerHTML += `<div class="bg-indigo-600/20 text-indigo-100 p-4 rounded-2xl max-w-[80%] self-end text-right border border-indigo-500/30">Operator: ${input.value}</div>`;
             const text = input.value;
             input.value = "";
             chat.scrollTop = chat.scrollHeight;
 
-            const loader = document.createElement('div');
-            loader.className = "text-gray-500 italic text-[10px] uppercase tracking-widest p-2";
-            loader.innerText = "Processing Neural Input...";
-            chat.appendChild(loader);
+            // Loader
+            const loaderId = 'loader-' + Date.now();
+            chat.innerHTML += `<div id="${loaderId}" class="text-gray-500 italic text-[10px] uppercase tracking-widest p-2 self-start flex items-center gap-2"><span class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-ping"></span> Processing Neural Input...</div>`;
+            chat.scrollTop = chat.scrollHeight;
 
+            // Fetch AI
             const reply = await callGemini(text);
-            chat.removeChild(loader);
-            chat.innerHTML += `<div class="bg-white/5 p-4 rounded-2xl max-w-[80%] border border-white/5">discGPT: ${reply}</div>`;
+            
+            // Output AI
+            document.getElementById(loaderId).remove();
+            chat.innerHTML += `<div class="bg-white/5 text-gray-200 p-4 rounded-2xl max-w-[80%] self-start border border-white/10 shadow-lg">discGPT: ${reply}</div>`;
             chat.scrollTop = chat.scrollHeight;
         }
+
+        // --- EVENT LISTENERS ---
+        // Handle changes in UI immediately mapping to visual updates (e.g. toggles updating text)
+        document.addEventListener('change', (e) => {
+            if(e.target.type === 'checkbox' && e.target.id !== 'embedOnly') {
+                const label = e.target.parentElement.nextElementSibling;
+                if(label) label.innerText = e.target.checked ? 'Enabled' : 'Disabled';
+            }
+        });
     </script>
 </body>
 </html>
