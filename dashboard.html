@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>discGPT | Control Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0b0e14; }
+        .glass { background: rgba(30, 31, 34, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
+    </style>
+</head>
+<body class="text-white min-h-screen">
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="flex flex-col items-center justify-center min-h-screen p-6">
+        <div class="glass p-10 rounded-3xl shadow-2xl w-full max-w-md text-center">
+            <h1 class="text-4xl font-extrabold mb-2 italic text-indigo-500">discGPT</h1>
+            <p class="text-gray-400 text-sm mb-8 uppercase tracking-widest">Web Command Bridge</p>
+            
+            <div class="space-y-4">
+                <input type="password" id="auth-key" placeholder="Enter Dashboard Key..." 
+                    class="w-full bg-[#313338] p-4 rounded-xl outline-none border border-transparent focus:border-indigo-500 transition text-center font-mono">
+                <button onclick="attemptLogin()" id="login-btn"
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 py-4 rounded-xl font-bold transition-all transform hover:scale-[1.02]">
+                    Authenticate
+                </button>
+            </div>
+            <p id="login-error" class="text-red-400 text-xs mt-4 hidden"></p>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD (HIDDEN BY DEFAULT) -->
+    <div id="main-dash" class="hidden p-6 lg:p-12 max-w-6xl mx-auto">
+        <header class="flex justify-between items-center mb-12">
+            <div>
+                <h2 id="welcome-text" class="text-3xl font-black italic uppercase">Panel</h2>
+                <p class="text-gray-500 text-sm">Managing discGPT AI instance</p>
+            </div>
+            <button onclick="location.reload()" class="bg-red-500/10 text-red-500 px-6 py-2 rounded-full text-xs font-bold hover:bg-red-500/20 transition">
+                Logout
+            </button>
+        </header>
+
+        <!-- ADMIN SECTION -->
+        <div id="admin-section" class="hidden space-y-8">
+            <div class="glass p-8 rounded-3xl">
+                <h3 class="text-red-500 font-bold uppercase text-xs mb-6 tracking-tighter">Server Tier Management</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-xs text-gray-400 uppercase ml-2">Guild ID</label>
+                        <input type="text" id="target-guild" placeholder="1234567890..." 
+                            class="w-full bg-[#313338] p-4 rounded-xl outline-none focus:ring-2 focus:ring-red-500/50">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs text-gray-400 uppercase ml-2">Access Tier</label>
+                        <select id="target-tier" class="w-full bg-[#313338] p-4 rounded-xl outline-none appearance-none">
+                            <option value="Free">Free Plan</option>
+                            <option value="Plus">Plus Plan</option>
+                            <option value="Unlimited">Unlimited Plan</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="updateTier()" class="w-full bg-white text-black py-4 rounded-xl font-black hover:bg-gray-200 transition">
+                            APPLY CHANGES
+                        </button>
+                    </div>
+                </div>
+                <p id="admin-feedback" class="mt-4 text-center text-sm font-medium"></p>
+            </div>
+        </div>
+
+        <!-- USER SECTION -->
+        <div id="user-section" class="hidden glass p-8 rounded-3xl mt-8">
+            <h3 class="text-indigo-400 font-bold uppercase text-xs mb-4">Account Overview</h3>
+            <div class="flex items-center space-x-4">
+                <div class="h-12 w-12 bg-indigo-500/20 rounded-full flex items-center justify-center text-indigo-500 font-bold">
+                    ID
+                </div>
+                <div>
+                    <p id="user-display-name" class="font-bold text-lg">Loading...</p>
+                    <p class="text-gray-500 text-xs">Discord Authorized User</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update this URL to match your bot's public IP/Port
+        const BOT_URL = "http://YOUR_BOT_IP:21187"; 
+        const API_KEY = "bohNFcIumG0hWxp6E8l8b08nubQklL1GURibpKLtAVpUpslFzn";
+        let sessionKey = "";
+
+        async function attemptLogin() {
+            const key = document.getElementById('auth-key').value;
+            const btn = document.getElementById('login-btn');
+            const err = document.getElementById('login-error');
+
+            btn.disabled = true;
+            btn.innerText = "Verifying...";
+            err.classList.add('hidden');
+
+            try {
+                const response = await fetch(`${BOT_URL}/auth?key=${API_KEY}&pass=${key}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    sessionKey = key;
+                    showDashboard(data);
+                } else {
+                    throw new Error(data.error || "Authentication Failed");
+                }
+            } catch (e) {
+                err.innerText = e.message;
+                err.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerText = "Authenticate";
+            }
+        }
+
+        function showDashboard(data) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-dash').classList.remove('hidden');
+            document.getElementById('welcome-text').innerText = `${data.type} Dashboard`;
+
+            if (data.type === 'admin') {
+                document.getElementById('admin-section').classList.remove('hidden');
+            } else {
+                document.getElementById('user-section').classList.remove('hidden');
+                document.getElementById('user-display-name').innerText = data.username;
+            }
+        }
+
+        async function updateTier() {
+            const gid = document.getElementById('target-guild').value;
+            const tier = document.getElementById('target-tier').value;
+            const feedback = document.getElementById('admin-feedback');
+
+            if (!gid) return alert("Please enter a Guild ID");
+
+            try {
+                const response = await fetch(`${BOT_URL}/admin/update_tier?key=${API_KEY}&pass=${sessionKey}&guild_id=${gid}&tier=${tier}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    feedback.className = "mt-4 text-center text-sm font-medium text-green-400";
+                    feedback.innerText = `Success: Guild ${gid} is now on the ${tier} plan.`;
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (e) {
+                feedback.className = "mt-4 text-center text-sm font-medium text-red-400";
+                feedback.innerText = "Error: " + e.message;
+            }
+        }
+    </script>
+</body>
+</html>
