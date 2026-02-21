@@ -12,12 +12,92 @@
         .accent-gradient { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); }
         .glow-hover:hover { box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
         
-        /* Smooth transitions for dashboard elements */
         .animate-in { animation: fadeIn 0.5s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .tab-active { border-bottom: 2px solid #6366f1; color: white; }
     </style>
 </head>
 <body class="text-white min-h-screen selection:bg-indigo-500/30">
+
+    <!-- CONNECTION ERROR MODAL -->
+    <div id="setup-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="glass max-w-2xl w-full rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10 flex flex-col max-h-[90vh]">
+            <!-- Header -->
+            <div class="p-8 pb-4 flex justify-between items-start">
+                <div>
+                    <h2 class="text-2xl font-black italic tracking-tighter text-red-400">BRIDGE_LINK_BLOCKED</h2>
+                    <p class="text-gray-500 text-[10px] uppercase tracking-widest font-bold">Secure Browser Configuration Required</p>
+                </div>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Content -->
+            <div class="p-8 pt-0 overflow-y-auto">
+                <div class="bg-indigo-500/10 border border-indigo-500/20 p-4 rounded-2xl mb-6">
+                    <h3 class="text-indigo-400 text-xs font-bold uppercase mb-1">Why do I need to do this?</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        This dashboard is hosted on <span class="text-white font-bold">HTTPS (Secure)</span>, but your bot is at <span class="text-white font-bold">HTTP (Standard)</span>. 
+                        Browsers block this to prevent "Mixed Content" security risks. You must manually allow this connection once to enable the bridge.
+                    </p>
+                </div>
+
+                <!-- Tabs -->
+                <div class="flex space-x-6 border-b border-white/5 mb-6 text-xs font-bold uppercase tracking-widest text-gray-500">
+                    <button onclick="switchTab('chrome')" id="tab-chrome" class="pb-3 tab-active transition-all">Chrome / Edge</button>
+                    <button onclick="switchTab('firefox')" id="tab-firefox" class="pb-3 transition-all">Firefox</button>
+                    <button onclick="switchTab('safari')" id="tab-safari" class="pb-3 transition-all">Safari</button>
+                </div>
+
+                <!-- Tab Content: Chrome/Edge -->
+                <div id="content-chrome" class="space-y-4">
+                    <div class="flex gap-4 items-start bg-white/5 p-4 rounded-2xl">
+                        <div class="h-8 w-8 bg-indigo-500 rounded-full flex items-center justify-center font-bold text-sm shrink-0">1</div>
+                        <p class="text-sm text-gray-300">Click the <span class="text-white font-bold">Padlock/Tune Icon</span> 🔒 at the very left of your address bar (where it says the website name).</p>
+                    </div>
+                    <div class="flex gap-4 items-start bg-white/5 p-4 rounded-2xl">
+                        <div class="h-8 w-8 bg-indigo-500 rounded-full flex items-center justify-center font-bold text-sm shrink-0">2</div>
+                        <p class="text-sm text-gray-300">Select <span class="text-white font-bold">"Site settings"</span>.</p>
+                    </div>
+                    <div class="flex gap-4 items-start bg-white/5 p-4 rounded-2xl">
+                        <div class="h-8 w-8 bg-indigo-500 rounded-full flex items-center justify-center font-bold text-sm shrink-0">3</div>
+                        <p class="text-sm text-gray-300">Scroll to <span class="text-white font-bold">"Insecure content"</span> and change it to <span class="text-green-400 font-bold">Allow</span>.</p>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Firefox -->
+                <div id="content-firefox" class="hidden space-y-4">
+                    <div class="flex gap-4 items-start bg-white/5 p-4 rounded-2xl">
+                        <div class="h-8 w-8 bg-orange-500 rounded-full flex items-center justify-center font-bold text-sm shrink-0">1</div>
+                        <p class="text-sm text-gray-300">Click the <span class="text-white font-bold">Shield Icon</span> 🛡️ to the left of the URL bar.</p>
+                    </div>
+                    <div class="flex gap-4 items-start bg-white/5 p-4 rounded-2xl">
+                        <div class="h-8 w-8 bg-orange-500 rounded-full flex items-center justify-center font-bold text-sm shrink-0">2</div>
+                        <p class="text-sm text-gray-300">Toggle <span class="text-white font-bold">"Enhanced Tracking Protection"</span> to <span class="text-red-400 font-bold">OFF</span> for this specific page.</p>
+                    </div>
+                    <div class="flex gap-4 items-start bg-white/5 p-4 rounded-2xl">
+                        <div class="h-8 w-8 bg-orange-500 rounded-full flex items-center justify-center font-bold text-sm shrink-0">3</div>
+                        <p class="text-sm text-gray-300">If it still fails, click the padlock -> Connection secure -> <span class="text-white font-bold">Disable protection for now</span>.</p>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Safari -->
+                <div id="content-safari" class="hidden space-y-4 text-center py-6">
+                    <p class="text-sm text-gray-300">Safari has extremely aggressive security that makes connecting to remote home-bots difficult.</p>
+                    <p class="text-sm text-indigo-400 font-bold">It is highly recommended to use Chrome or Firefox to manage your bot.</p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-8 pt-0">
+                <button onclick="location.reload()" class="w-full py-4 accent-gradient rounded-2xl font-bold glow-hover">
+                    I've allowed it, Refresh Dashboard
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- LOGIN SCREEN -->
     <div id="login-screen" class="flex flex-col items-center justify-center min-h-screen p-6">
@@ -43,23 +123,14 @@
             <!-- Connection Status -->
             <div class="mt-10 pt-6 border-t border-white/5">
                 <div id="conn-status" class="flex flex-col items-center space-y-2">
-                    <div class="inline-flex items-center space-x-3 px-4 py-2 bg-black/20 rounded-full border border-white/5">
+                    <button onclick="openModal()" class="inline-flex items-center space-x-3 px-4 py-2 bg-black/20 rounded-full border border-white/5 hover:bg-white/5 transition group">
                         <span class="relative flex h-2 w-2">
                             <span id="status-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
                             <span id="status-dot" class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
                         </span>
                         <span id="status-text" class="text-[9px] text-gray-400 uppercase font-bold tracking-widest">Checking Bridge...</span>
-                    </div>
-                    
-                    <!-- Firefox Specific Help -->
-                    <div id="mixed-content-warning" class="hidden glass p-4 rounded-xl mt-4 max-w-[280px]">
-                        <p class="text-[10px] text-red-400 font-bold mb-2 uppercase tracking-tight">Firefox Security Blocked Connection</p>
-                        <p class="text-[9px] text-gray-400 leading-relaxed text-left">
-                            1. Click the <span class="text-white font-bold">Shield Icon</span> 🛡️ to the left of the URL bar.<br>
-                            2. Toggle <span class="text-white font-bold">"Enhanced Tracking Protection"</span> to OFF.<br>
-                            3. If that fails, click the padlock -> "Connection secure" -> "More information" -> "Permissions" -> Unblock Insecure Content.
-                        </p>
-                    </div>
+                        <svg class="w-3 h-3 text-gray-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </button>
                 </div>
             </div>
         </div>
@@ -137,37 +208,43 @@
     </div>
 
     <script>
-        /**
-         * IMPORTANT:
-         * 1. Change BOT_IP to your server's public IP.
-         * 2. If using Vercel (HTTPS) and your Bot is HTTP, you MUST
-         * Allow "Insecure Content" in Site Settings (click padlock).
-         */
-        const BOT_URL = "http://YOUR_BOT_IP:21187"; 
+        // UPDATED: Using your specific host and port
+        const BOT_URL = "http://fi13.bot-hosting.cloud:21187"; 
         const API_KEY = "bohNFcIumG0hWxp6E8l8b08nubQklL1GURibpKLtAVpUpslFzn";
         let sessionKey = "";
 
-        // Periodically check connection
+        function openModal() { document.getElementById('setup-modal').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('setup-modal').classList.add('hidden'); }
+
+        function switchTab(browser) {
+            ['chrome', 'firefox', 'safari'].forEach(b => {
+                document.getElementById(`content-${b}`).classList.add('hidden');
+                document.getElementById(`tab-${b}`).classList.remove('tab-active');
+            });
+            document.getElementById(`content-${browser}`).classList.remove('hidden');
+            document.getElementById(`tab-${browser}`).classList.add('tab-active');
+        }
+
         async function checkConnection() {
             const statusDot = document.getElementById('status-dot');
             const statusPing = document.getElementById('status-ping');
             const statusText = document.getElementById('status-text');
-            const warning = document.getElementById('mixed-content-warning');
 
             try {
+                // Testing the ping endpoint to verify link
                 const response = await fetch(`${BOT_URL}/ping`, { mode: 'cors' });
                 if (response.ok) {
                     statusDot.className = "relative inline-flex rounded-full h-2 w-2 bg-green-500";
                     statusPing.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75";
                     statusText.innerText = "Bridge Link Active";
-                    warning.classList.add('hidden');
+                    closeModal();
                 }
             } catch (e) {
                 statusDot.className = "relative inline-flex rounded-full h-2 w-2 bg-red-500";
                 statusPing.classList.add('hidden');
                 statusText.innerText = "Bridge Link Blocked";
                 statusText.classList.add('text-red-500');
-                warning.classList.remove('hidden');
+                openModal();
             }
         }
 
@@ -195,11 +272,11 @@
                     throw new Error(data.error || "Access Denied");
                 }
             } catch (e) {
-                err.innerText = "AUTH_FAILURE: Check connection/Mixed Content";
+                err.innerText = "AUTH_FAILURE: Check connection/Bridge Blocked";
                 err.classList.remove('hidden');
                 btn.disabled = false;
                 btn.innerText = "Authorize Session";
-                console.error(e);
+                openModal();
             }
         }
 
