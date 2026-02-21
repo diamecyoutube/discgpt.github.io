@@ -11,6 +11,8 @@
         .glass { background: rgba(30, 31, 34, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
         .input-dark { background: #313338; border: 1px solid rgba(255,255,255,0.05); transition: all 0.2s; }
         .input-dark:focus { border-color: #6366f1; ring: 2px solid rgba(99, 102, 241, 0.2); }
+        .premium-glow { box-shadow: 0 0 15px rgba(99, 102, 241, 0.3); border-color: rgba(99, 102, 241, 0.5); }
+        .category-tab.active { background: rgba(99, 102, 241, 0.1); color: #818cf8; border-color: #6366f1; }
     </style>
 </head>
 <body class="bg-[#0b0e14] text-white min-h-screen">
@@ -32,10 +34,10 @@
     </div>
 
     <!-- MAIN DASHBOARD -->
-    <div id="dashPage" class="hidden p-6 md:p-12 max-w-6xl mx-auto">
+    <div id="dashPage" class="hidden p-6 md:p-12 max-w-7xl mx-auto">
         <header class="flex justify-between items-center mb-12">
             <div>
-                <h1 id="userLabel" class="text-3xl font-black uppercase italic tracking-tighter">Panel</h1>
+                <h1 id="userLabel" class="text-3xl font-black uppercase italic tracking-tighter text-indigo-400">Panel</h1>
                 <p class="text-gray-500 text-xs mt-1">Authorized Session Active</p>
             </div>
             <button onclick="location.reload()" class="bg-white/5 hover:bg-red-500/10 text-gray-400 hover:text-red-500 px-6 py-2 rounded-xl text-xs font-bold transition border border-white/5">Logout</button>
@@ -58,79 +60,78 @@
                         <option value="Unlimited">Unlimited Pro</option>
                     </select>
                 </div>
-                <button onclick="updateGuildSettings(true)" id="adminUpdateBtn" class="w-full bg-red-600 hover:bg-red-700 py-4 rounded-xl font-black mt-6 transition shadow-lg shadow-red-600/20">FORCE UPDATE TIER</button>
+                <button onclick="updateGuildSettings(true)" id="adminUpdateBtn" class="w-full bg-red-600 hover:bg-red-700 py-4 rounded-xl font-black mt-6 transition shadow-lg shadow-red-600/20 text-white">FORCE UPDATE TIER</button>
+                <p id="adminStatus" class="text-center text-xs font-bold mt-2"></p>
             </div>
         </section>
 
-        <!-- SERVER LIST & SETTINGS -->
-        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- DASHBOARD GRID -->
+        <main class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- SERVERS LIST -->
             <aside class="lg:col-span-1 space-y-4">
                 <h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Your Managed Servers</h2>
                 <div id="guildList" class="space-y-3">
-                    <!-- Guilds load here -->
                     <div class="animate-pulse bg-white/5 h-16 rounded-2xl w-full"></div>
                 </div>
             </aside>
 
-            <section class="lg:col-span-2">
+            <!-- SETTINGS AREA -->
+            <section class="lg:col-span-3">
                 <div id="settingsPlaceholder" class="glass h-full flex items-center justify-center p-12 rounded-3xl text-gray-600 text-center border-dashed border-2">
                     <div>
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mx-auto mb-4 opacity-20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
-                        <p class="font-medium">Select a server to manage configurations</p>
+                        <p class="font-medium">Select a server to access configurations</p>
                     </div>
                 </div>
 
-                <div id="settingsPanel" class="hidden glass p-8 rounded-3xl space-y-8 animate-in slide-in-from-right duration-300">
-                    <div class="flex items-center justify-between border-b border-white/5 pb-6">
+                <div id="settingsPanel" class="hidden glass p-8 rounded-3xl space-y-8 animate-in slide-in-from-right duration-300 min-h-[600px] flex flex-col">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-white/5 pb-6 gap-4">
                         <div class="flex items-center gap-4">
-                            <img id="activeIcon" src="" class="w-12 h-12 rounded-2xl bg-indigo-500/20">
+                            <img id="activeIcon" src="" class="w-14 h-14 rounded-2xl bg-indigo-500/20 object-cover">
                             <div>
-                                <h2 id="activeName" class="text-xl font-black italic">Server Name</h2>
+                                <h2 id="activeName" class="text-2xl font-black italic">Server Name</h2>
                                 <span id="activeTier" class="text-[10px] font-bold bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded uppercase tracking-tighter">Tier</span>
                             </div>
                         </div>
+                        
+                        <!-- CATEGORY TABS -->
+                        <nav id="categoryNav" class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                            <button onclick="switchCategory('ai')" class="category-tab active px-4 py-2 rounded-lg text-xs font-bold border border-white/5 whitespace-nowrap transition">Core AI</button>
+                            <button onclick="switchCategory('mod')" class="category-tab px-4 py-2 rounded-lg text-xs font-bold border border-white/5 whitespace-nowrap transition">Security</button>
+                            <button onclick="switchCategory('automod')" class="category-tab px-4 py-2 rounded-lg text-xs font-bold border border-white/5 whitespace-nowrap transition">Auto-Neural</button>
+                            <button onclick="switchCategory('logs')" class="category-tab px-4 py-2 rounded-lg text-xs font-bold border border-white/5 whitespace-nowrap transition">Insight Logs</button>
+                            <button onclick="switchCategory('billing')" class="category-tab px-4 py-2 rounded-lg text-xs font-bold border border-white/5 whitespace-nowrap transition">Subscription</button>
+                        </nav>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-bold text-gray-500 uppercase">Primary Neural Model</label>
-                            <select id="modelSelect" class="w-full input-dark p-4 rounded-xl outline-none appearance-none cursor-pointer">
-                                <option value="Mistral">Mistral 7B (Fast)</option>
-                                <option value="Gemini">Gemini 1.5 Flash</option>
-                                <option value="Llama">Llama 3 (Experimental)</option>
-                                <option value="Groq">Groq-LPU Speed</option>
-                            </select>
-                        </div>
-
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-bold text-gray-500 uppercase">Backup Model (Failover)</label>
-                            <select id="backupSelect" class="w-full input-dark p-4 rounded-xl outline-none appearance-none cursor-pointer">
-                                <option value="None">Disabled</option>
-                                <option value="Mistral">Mistral 7B</option>
-                                <option value="Gemini">Gemini 1.5</option>
-                            </select>
-                        </div>
+                    <!-- CONTENT AREA -->
+                    <div id="categoryContent" class="flex-1 space-y-8">
+                        <!-- Dynamic Content Loaded Here -->
                     </div>
 
-                    <div class="space-y-4">
-                        <label class="text-[10px] font-bold text-gray-500 uppercase">System Toggles</label>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="flex items-center justify-between p-4 glass rounded-xl">
-                                <span class="text-sm font-medium">Embed Neural Footer</span>
-                                <input type="checkbox" id="footerToggle" class="w-5 h-5 accent-indigo-500">
-                            </div>
-                            <div class="flex items-center justify-between p-4 glass rounded-xl opacity-50 cursor-not-allowed">
-                                <span class="text-sm font-medium">Auto-Moderation <span class="text-[8px] bg-indigo-500 text-white px-1 rounded ml-1">PLUS</span></span>
-                                <input type="checkbox" disabled class="w-5 h-5 accent-indigo-500">
-                            </div>
-                        </div>
+                    <div class="pt-6 border-t border-white/5">
+                        <button onclick="updateGuildSettings(false)" id="saveBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 py-4 rounded-xl font-black transition shadow-lg shadow-indigo-600/20">SAVE CHANGES</button>
+                        <p id="saveStatus" class="text-center text-xs font-bold mt-4"></p>
                     </div>
-
-                    <button onclick="updateGuildSettings(false)" id="saveBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 py-4 rounded-xl font-black transition shadow-lg shadow-indigo-600/20">SAVE CONFIGURATION</button>
-                    <p id="saveStatus" class="text-center text-xs font-bold"></p>
                 </div>
             </section>
         </main>
+    </div>
+
+    <!-- PREMIUM MODAL OVERLAY -->
+    <div id="premiumModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="glass p-8 rounded-3xl max-w-sm w-full text-center border-indigo-500/30 border relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-indigo-600/20 blur-3xl rounded-full"></div>
+            <div class="w-16 h-16 bg-indigo-600/10 text-indigo-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </div>
+            <h3 class="text-2xl font-black italic text-white mb-2">Neural Plus Feature</h3>
+            <p class="text-gray-400 text-sm mb-8">You've come across a premium feature restricted to discGPT Plus members.</p>
+            <div class="space-y-3">
+                <button onclick="window.open('https://discord.gg/discgpt')" class="w-full bg-indigo-600 py-3 rounded-xl font-bold text-sm">Upgrade for $4.99/mo</button>
+                <button onclick="closePremiumModal()" class="w-full py-3 text-gray-500 text-xs font-bold hover:text-white transition">Dismiss</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -139,6 +140,59 @@
         let curPass = "";
         let selectedGuild = null;
         let guildsData = [];
+        let activeCategory = 'ai';
+
+        const categories = {
+            'ai': {
+                title: 'Core AI Configuration',
+                description: 'Manage how the bot interprets and generates neural responses.',
+                fields: [
+                    { id: 'modelSelect', label: 'Primary Engine', type: 'select', options: ['Mistral', 'Gemini', 'Llama', 'Groq'], premium: false },
+                    { id: 'backupSelect', label: 'Failover Engine', type: 'select', options: ['None', 'Mistral', 'Gemini'], premium: false },
+                    { id: 'temp', label: 'Neural Temperature (Creativity)', type: 'range', premium: true },
+                    { id: 'maxTokens', label: 'Response Length Limit', type: 'range', premium: true },
+                    { id: 'footerToggle', label: 'Embed Neural Footer', type: 'toggle', premium: false }
+                ]
+            },
+            'mod': {
+                title: 'Security & Moderation',
+                description: 'Configure standard and advanced protection tools.',
+                fields: [
+                    { id: 'logChannel', label: 'Log Action Channel', type: 'text', premium: false },
+                    { id: 'kickCmd', label: 'Enable /kick command', type: 'toggle', premium: false },
+                    { id: 'banCmd', label: 'Enable /ban command', type: 'toggle', premium: false },
+                    { id: 'aiMod', label: 'AI-Powered Context Ban', type: 'toggle', premium: true },
+                    { id: 'ghostPing', label: 'Ghost-Ping Detection', type: 'toggle', premium: true }
+                ]
+            },
+            'automod': {
+                title: 'Auto-Neural Protection',
+                description: 'Autonomous AI monitoring for your server.',
+                fields: [
+                    { id: 'toxicity', label: 'Toxicity Filter (AI)', type: 'toggle', premium: true },
+                    { id: 'linkCheck', label: 'Neural Link Analysis', type: 'toggle', premium: true },
+                    { id: 'spamDetect', label: 'Burst Message Protection', type: 'toggle', premium: false },
+                    { id: 'scamBlock', label: 'Scam/Drainer Detection', type: 'toggle', premium: true }
+                ]
+            },
+            'logs': {
+                title: 'Insight Logs',
+                description: 'Deep data analytics of user interactions.',
+                fields: [
+                    { id: 'saveChat', label: 'Archive AI Conversations', type: 'toggle', premium: true },
+                    { id: 'userStats', label: 'User Sentiment Analysis', type: 'toggle', premium: true },
+                    { id: 'dashLogs', label: 'Dashboard Access Logs', type: 'toggle', premium: false }
+                ]
+            },
+            'billing': {
+                title: 'Subscription',
+                description: 'Manage your server membership and perks.',
+                fields: [
+                    { id: 'currentPlan', label: 'Active Plan Status', type: 'text', premium: false, readonly: true },
+                    { id: 'customBot', label: 'Custom Bot Branding', type: 'toggle', premium: true }
+                ]
+            }
+        };
 
         function showError(msg) {
             const err = document.getElementById('loginError');
@@ -150,22 +204,15 @@
             const pass = document.getElementById('keyInput').value;
             const btn = document.getElementById('loginBtn');
             btn.disabled = true; btn.innerText = "AUTHENTICATING...";
-            
             try {
-                // Security: Bridge handles auth, pass is never stored in index.html source
                 const res = await fetch(`${BOT_URL}/auth?key=${API_KEY}&pass=${pass}&t=${Date.now()}`);
                 const data = await res.json();
-                
                 if (data.type) {
                     curPass = pass;
                     document.getElementById('loginPage').classList.add('hidden');
                     document.getElementById('dashPage').classList.remove('hidden');
                     document.getElementById('userLabel').innerText = data.type + " Panel";
-                    
-                    if(data.type === 'admin') {
-                        document.getElementById('adminPanel').classList.remove('hidden');
-                    }
-                    
+                    if(data.type === 'admin') document.getElementById('adminPanel').classList.remove('hidden');
                     await loadGuilds();
                 } else { throw new Error(data.error || "Access Denied"); }
             } catch (e) {
@@ -178,63 +225,127 @@
             try {
                 const res = await fetch(`${BOT_URL}/user/guilds?key=${API_KEY}&pass=${curPass}`);
                 guildsData = await res.json();
-                
                 const list = document.getElementById('guildList');
                 list.innerHTML = "";
-                
                 guildsData.forEach(g => {
                     const item = document.createElement('div');
                     item.className = "glass p-4 rounded-2xl flex items-center gap-4 cursor-pointer hover:bg-white/5 transition border border-transparent hover:border-indigo-500/30";
                     item.onclick = () => selectGuild(g.id);
-                    item.innerHTML = `
-                        <img src="${g.icon || 'https://via.placeholder.com/64'}" class="w-10 h-10 rounded-xl">
-                        <div class="flex-1 overflow-hidden">
-                            <p class="text-sm font-bold truncate">${g.name}</p>
-                            <p class="text-[10px] text-gray-500 uppercase">${g.settings.tier}</p>
-                        </div>
-                    `;
+                    item.innerHTML = `<img src="${g.icon || 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-10 h-10 rounded-xl"><div class="flex-1 overflow-hidden"><p class="text-sm font-bold truncate">${g.name}</p><p class="text-[10px] text-gray-500 uppercase">${g.settings.tier}</p></div>`;
                     list.appendChild(item);
                 });
-            } catch (e) { console.error("Guild load failed", e); }
+            } catch (e) { console.error(e); }
         }
 
         function selectGuild(id) {
             selectedGuild = guildsData.find(g => g.id === id);
             document.getElementById('settingsPlaceholder').classList.add('hidden');
             document.getElementById('settingsPanel').classList.remove('hidden');
-            
-            document.getElementById('activeIcon').src = selectedGuild.icon || '';
+            document.getElementById('activeIcon').src = selectedGuild.icon || 'https://cdn.discordapp.com/embed/avatars/0.png';
             document.getElementById('activeName').innerText = selectedGuild.name;
             document.getElementById('activeTier').innerText = selectedGuild.settings.tier;
-            
-            // Populate settings
-            document.getElementById('modelSelect').value = selectedGuild.settings.model || 'Mistral';
-            document.getElementById('backupSelect').value = selectedGuild.settings.backup1 || 'None';
-            document.getElementById('footerToggle').checked = selectedGuild.settings.footer !== false;
+            switchCategory('ai');
+        }
+
+        function switchCategory(cat) {
+            activeCategory = cat;
+            document.querySelectorAll('.category-tab').forEach(b => {
+                b.classList.remove('active');
+                if(b.innerText.toLowerCase().includes(cat.substring(0,2))) b.classList.add('active');
+            });
+            renderCategory();
+        }
+
+        function isPremium() {
+            return selectedGuild && (selectedGuild.settings.tier === 'Plus' || selectedGuild.settings.tier === 'Unlimited');
+        }
+
+        function checkPremium(e, isFieldPremium) {
+            if (isFieldPremium && !isPremium()) {
+                e.preventDefault();
+                document.getElementById('premiumModal').classList.remove('hidden');
+                return false;
+            }
+            return true;
+        }
+
+        function renderCategory() {
+            const container = document.getElementById('categoryContent');
+            const cat = categories[activeCategory];
+            const premiumStatus = isPremium();
+
+            let html = `<div><h3 class="text-lg font-bold italic mb-1">${cat.title}</h3><p class="text-xs text-gray-500">${cat.description}</p></div><div class="grid grid-cols-1 md:grid-cols-2 gap-6">`;
+
+            cat.fields.forEach(f => {
+                const isRestricted = f.premium && !premiumStatus;
+                html += `
+                    <div class="space-y-2 ${isRestricted ? 'opacity-50 group' : ''}" onclick="${isRestricted ? 'checkPremium(event, true)' : ''}">
+                        <div class="flex items-center justify-between">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase flex items-center gap-1">
+                                ${f.label} 
+                                ${f.premium ? '<span class="bg-indigo-500 text-[8px] text-white px-1 rounded">PLUS</span>' : ''}
+                            </label>
+                        </div>
+                        ${renderField(f, isRestricted)}
+                    </div>`;
+            });
+
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        function renderField(f, disabled) {
+            const d = disabled ? 'readonly disabled' : '';
+            if (f.type === 'select') {
+                return `<select id="${f.id}" ${d} class="w-full input-dark p-4 rounded-xl outline-none appearance-none">
+                    ${f.options.map(opt => `<option value="${opt}" ${selectedGuild.settings[f.id] === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+                </select>`;
+            }
+            if (f.type === 'toggle') {
+                const checked = selectedGuild.settings[f.id] !== false ? 'checked' : '';
+                return `<div class="flex items-center justify-between p-4 glass rounded-xl">
+                    <span class="text-sm font-medium text-gray-300">Enabled Status</span>
+                    <input type="checkbox" id="${f.id}" ${checked} ${d} class="w-5 h-5 accent-indigo-500">
+                </div>`;
+            }
+            if (f.type === 'range') {
+                return `<input type="range" id="${f.id}" ${d} class="w-full accent-indigo-500 mt-2">`;
+            }
+            return `<input type="text" id="${f.id}" ${d} placeholder="Value..." class="w-full input-dark p-4 rounded-xl outline-none">`;
+        }
+
+        function closePremiumModal() {
+            document.getElementById('premiumModal').classList.add('hidden');
         }
 
         async function updateGuildSettings(isAdminForce = false) {
             const status = isAdminForce ? document.getElementById('adminStatus') : document.getElementById('saveStatus');
             const btn = isAdminForce ? document.getElementById('adminUpdateBtn') : document.getElementById('saveBtn');
-            
             const gid = isAdminForce ? document.getElementById('guildId').value : selectedGuild.id;
-            const settings = isAdminForce ? {
-                tier: document.getElementById('tierSelect').value,
-                model: 'Mistral',
-                footer: true
-            } : {
-                model: document.getElementById('modelSelect').value,
-                backup1: document.getElementById('backupSelect').value,
-                footer: document.getElementById('footerToggle').checked
-            };
+            
+            let settings = {};
+            if(isAdminForce) {
+                settings = { tier: document.getElementById('tierSelect').value };
+            } else {
+                // Gather all field values across categories for the current guild
+                Object.values(categories).forEach(c => {
+                    c.fields.forEach(f => {
+                        const el = document.getElementById(f.id);
+                        if(el) {
+                            if(f.type === 'toggle') settings[f.id] = el.checked;
+                            else settings[f.id] = el.value;
+                        } else {
+                            settings[f.id] = selectedGuild.settings[f.id];
+                        }
+                    });
+                });
+            }
 
             btn.disabled = true;
             status.innerText = "⏳ Syncing...";
-
             try {
                 const res = await fetch(`${BOT_URL}/guild/update?key=${API_KEY}&pass=${curPass}&guild_id=${gid}&settings=${encodeURIComponent(JSON.stringify(settings))}`);
                 const data = await res.json();
-                
                 if (data.success) {
                     status.innerText = "✅ Neural Bridge Synced";
                     status.className = "text-center text-xs font-bold text-green-500 mt-4";
