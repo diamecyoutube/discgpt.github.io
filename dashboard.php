@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>discGPT | Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0b0e14; }
+        .glass { background: rgba(30, 31, 34, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
+        .accent-gradient { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); }
+        .glow-hover:hover { box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
+        
+        /* Smooth transitions for dashboard elements */
+        .animate-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="text-white min-h-screen selection:bg-indigo-500/30">
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="flex flex-col items-center justify-center min-h-screen p-6">
+        <div class="glass p-10 rounded-[2.5rem] shadow-2xl w-full max-w-md text-center border border-white/10">
+            <div class="mb-6 inline-flex h-16 w-16 accent-gradient rounded-2xl items-center justify-center shadow-lg shadow-indigo-500/20 rotate-3">
+                <span class="text-3xl font-black text-white">DG</span>
+            </div>
+            <h1 class="text-4xl font-extrabold mb-2 italic tracking-tighter">discGPT</h1>
+            <p class="text-gray-500 text-[10px] mb-10 uppercase tracking-[0.5em] font-bold">Cloud Command Interface</p>
+            
+            <div class="space-y-4">
+                <div class="relative">
+                    <input type="password" id="auth-key" placeholder="System Access Key" 
+                        class="w-full bg-[#161921] p-4 rounded-2xl outline-none border border-white/5 focus:border-indigo-500 transition text-center font-mono placeholder:text-gray-700">
+                </div>
+                <button onclick="attemptLogin()" id="login-btn"
+                    class="w-full accent-gradient py-4 rounded-2xl font-bold transition-all transform active:scale-95 glow-hover text-white">
+                    Authorize Session
+                </button>
+            </div>
+            <p id="login-error" class="text-red-400 text-xs mt-4 hidden bg-red-500/10 p-3 rounded-xl border border-red-500/20"></p>
+            
+            <!-- Connection Status -->
+            <div class="mt-10 pt-6 border-t border-white/5">
+                <div id="conn-status" class="inline-flex items-center space-x-3 px-4 py-2 bg-black/20 rounded-full border border-white/5">
+                    <span class="relative flex h-2 w-2">
+                        <span id="status-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                        <span id="status-dot" class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
+                    </span>
+                    <span id="status-text" class="text-[9px] text-gray-400 uppercase font-bold tracking-widest">Linking to Bridge...</span>
+                </div>
+            </div>
+        </div>
+        <p class="mt-8 text-gray-600 text-[10px] uppercase tracking-widest">Powered by discGPT Neural Bridge</p>
+    </div>
+
+    <!-- MAIN DASHBOARD -->
+    <div id="main-dash" class="hidden p-6 lg:p-12 max-w-6xl mx-auto animate-in">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+            <div>
+                <div class="flex items-center space-x-3 mb-1">
+                    <div class="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <h2 id="welcome-text" class="text-3xl font-black italic uppercase tracking-tighter">Console</h2>
+                </div>
+                <p class="text-gray-500 text-sm">Secure Management Session</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div id="session-timer" class="text-[10px] font-mono text-gray-500 bg-white/5 px-3 py-1 rounded-md">SESSION: ACTIVE</div>
+                <button onclick="location.reload()" class="bg-red-500/10 text-red-500 px-6 py-2 rounded-xl text-xs font-bold hover:bg-red-500/20 transition border border-red-500/10">
+                    Disconnect
+                </button>
+            </div>
+        </header>
+
+        <!-- ADMIN SECTION -->
+        <div id="admin-section" class="hidden space-y-8">
+            <div class="glass p-8 rounded-[2rem] border-l-4 border-indigo-500">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="p-2 bg-indigo-500/20 rounded-lg">
+                        <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    </div>
+                    <h3 class="text-lg font-bold">Server Provisioning</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] text-gray-500 uppercase font-bold ml-1">Target Guild ID</label>
+                        <input type="text" id="target-guild" placeholder="1234567890..." 
+                            class="w-full bg-[#161921] p-4 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500/50 transition border border-white/5">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] text-gray-500 uppercase font-bold ml-1">Resource Allocation</label>
+                        <select id="target-tier" class="w-full bg-[#161921] p-4 rounded-2xl outline-none border border-white/5 appearance-none cursor-pointer">
+                            <option value="Free">Standard (Free)</option>
+                            <option value="Plus">Enhanced (Plus)</option>
+                            <option value="Unlimited">Unlimited (Neural)</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="updateTier()" class="w-full bg-white text-black py-4 rounded-2xl font-black hover:bg-gray-200 transition-all shadow-xl active:scale-95">
+                            PUSH UPDATE
+                        </button>
+                    </div>
+                </div>
+                <p id="admin-feedback" class="mt-6 text-center text-sm font-bold"></p>
+            </div>
+        </div>
+
+        <!-- USER SECTION -->
+        <div id="user-section" class="hidden glass p-8 rounded-[2rem] mt-8">
+            <h3 class="text-indigo-400 font-bold uppercase text-[10px] mb-6 tracking-widest">Identity Verified</h3>
+            <div class="flex items-center space-x-6">
+                <div class="h-20 w-20 accent-gradient rounded-3xl flex items-center justify-center text-white font-black text-3xl shadow-2xl rotate-3">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                </div>
+                <div>
+                    <p id="user-display-name" class="font-black text-3xl tracking-tighter">Loading...</p>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="h-2 w-2 bg-green-500 rounded-full"></span>
+                        <p class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Bridge Connection Secured</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * IMPORTANT:
+         * 1. Change BOT_IP to your server's public IP.
+         * 2. If using Vercel (HTTPS) and your Bot is HTTP, you MUST
+         * Allow "Insecure Content" in Site Settings (click padlock).
+         */
+        const BOT_URL = "http://YOUR_BOT_IP:21187"; 
+        const API_KEY = "bohNFcIumG0hWxp6E8l8b08nubQklL1GURibpKLtAVpUpslFzn";
+        let sessionKey = "";
+
+        // Periodically check connection
+        async function checkConnection() {
+            const statusDot = document.getElementById('status-dot');
+            const statusPing = document.getElementById('status-ping');
+            const statusText = document.getElementById('status-text');
+
+            try {
+                const response = await fetch(`${BOT_URL}/guild/info?key=${API_KEY}&guild_id=ping`, { mode: 'cors' });
+                if (response.ok) {
+                    statusDot.className = "relative inline-flex rounded-full h-2 w-2 bg-green-500";
+                    statusPing.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75";
+                    statusText.innerText = "Bridge Link Active";
+                }
+            } catch (e) {
+                statusDot.className = "relative inline-flex rounded-full h-2 w-2 bg-red-500";
+                statusPing.classList.add('hidden');
+                statusText.innerText = "Bridge Link Blocked";
+                statusText.classList.add('text-red-500');
+            }
+        }
+
+        window.onload = checkConnection;
+
+        async function attemptLogin() {
+            const key = document.getElementById('auth-key').value;
+            const btn = document.getElementById('login-btn');
+            const err = document.getElementById('login-error');
+
+            if(!key) return;
+
+            btn.disabled = true;
+            btn.innerText = "PROCESSING...";
+            err.classList.add('hidden');
+
+            try {
+                const response = await fetch(`${BOT_URL}/auth?key=${API_KEY}&pass=${key}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    sessionKey = key;
+                    showDashboard(data);
+                } else {
+                    throw new Error(data.error || "Access Denied");
+                }
+            } catch (e) {
+                err.innerText = "AUTH_FAILURE: " + e.message;
+                err.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerText = "Authorize Session";
+            }
+        }
+
+        function showDashboard(data) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-dash').classList.remove('hidden');
+            document.getElementById('welcome-text').innerText = `${data.type} Access`;
+
+            if (data.type === 'admin') {
+                document.getElementById('admin-section').classList.remove('hidden');
+            } else {
+                document.getElementById('user-section').classList.remove('hidden');
+                document.getElementById('user-display-name').innerText = data.username;
+            }
+        }
+
+        async function updateTier() {
+            const gid = document.getElementById('target-guild').value;
+            const tier = document.getElementById('target-tier').value;
+            const feedback = document.getElementById('admin-feedback');
+
+            if (!gid) {
+                feedback.className = "mt-6 text-center text-sm font-bold text-red-400";
+                feedback.innerText = "ERROR: Missing Guild ID";
+                return;
+            }
+
+            try {
+                const response = await fetch(`${BOT_URL}/admin/update_tier?key=${API_KEY}&pass=${sessionKey}&guild_id=${gid}&tier=${tier}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    feedback.className = "mt-6 text-center text-sm font-bold text-green-400";
+                    feedback.innerText = `COMMIT_SUCCESS: Guild ${gid} set to ${tier}`;
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (e) {
+                feedback.className = "mt-6 text-center text-sm font-bold text-red-400";
+                feedback.innerText = "COMMIT_ERROR: " + e.message;
+            }
+        }
+    </script>
+</body>
+</html>
