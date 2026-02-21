@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>discGPT | AI Powered Discord Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .gradient-text { background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nitro-gradient { background: linear-gradient(45deg, #ff73fa, #5865f2); }
+        .check { color: #10b981; font-weight: 700; font-size: 1.1rem; }
+        .dash { color: #374151; font-weight: 700; font-size: 1.1rem; }
+        
+        .discord-window { background: #313338; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; }
+        .bot-tag { background: #5865F2; color: white; font-size: 10px; padding: 1px 4px; border-radius: 3px; font-weight: 600; vertical-align: middle; margin-left: 4px; }
+    </style>
+</head>
+<body class="bg-[#0b0e14] text-gray-200 overflow-x-hidden">
+
+    <!-- Project Header -->
+    <div class="w-full bg-indigo-600/10 border-b border-indigo-500/20 py-2.5 sticky top-0 z-50 backdrop-blur-md">
+        <div class="container mx-auto px-6 flex justify-center items-center gap-8 text-[11px] font-bold tracking-[0.15em] uppercase text-indigo-300">
+            <div class="flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
+                CORE: <span class="text-white">discGPT V3.1</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="container mx-auto px-6 py-6 flex justify-between items-center">
+        <div class="text-2xl font-black flex items-center gap-2 tracking-tighter">
+            <div class="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center rotate-3">
+                <span class="text-white text-sm -rotate-3">dG</span>
+            </div>
+            <span>discGPT</span>
+        </div>
+        <div class="hidden md:flex gap-8 items-center text-sm font-medium text-gray-400">
+            <a href="#demo" class="hover:text-white transition">Showcase</a>
+            <a href="#pricing" class="hover:text-white transition">Plans</a>
+            <a href="#comparison" class="hover:text-white transition">Compare</a>
+            <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-full transition font-bold">Invite Bot</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="container mx-auto px-6 pt-16 pb-24 text-center">
+        <h1 class="text-5xl md:text-8xl font-black mb-8 leading-tight">
+            The Smartest <br>
+            <span class="gradient-text">Conversational Bot</span>
+        </h1>
+        <p class="max-w-2xl mx-auto text-gray-400 text-lg md:text-xl mb-10 leading-relaxed">
+            Powered by <span class="text-pink-400">Gemini 3 Flash</span>. Uptime guaranteed by a chain of backup models. No more "API Errors"—just answers.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-4 rounded-xl font-black text-lg transition shadow-xl shadow-indigo-500/20">ADD TO SERVER</button>
+            <button class="glass hover:bg-white/5 text-white px-10 py-4 rounded-xl font-black text-lg transition">LEARN MORE</button>
+        </div>
+    </section>
+
+    <!-- Interactive Showcase Section -->
+    <section id="demo" class="container mx-auto px-6 py-24 border-t border-white/5 bg-white/[0.01]">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-black mb-4 uppercase tracking-tight italic">How discGPT Works</h2>
+            <p class="text-gray-500">Live simulations of our advanced logic chains.</p>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-12 items-center mb-24">
+            <div>
+                <h3 class="text-2xl font-bold mb-4 text-indigo-400">Infinite Backup Chains</h3>
+                <p class="text-gray-400 mb-6 leading-relaxed">
+                    Ever get "Application did not respond" from other bots? 
+                    On the Unlimited plan, if <strong>Gemini 3 Flash</strong> fails, we instantly switch to <strong>Llama</strong>, then <strong>Mistral</strong>. The user never sees the failover; they just get the answer.
+                </p>
+                <div class="flex gap-4 items-center text-xs font-bold text-gray-500 mb-2">
+                    <span class="flex items-center gap-1 text-red-500"><span class="w-2 h-2 rounded-full bg-red-500"></span> Gemini Offline</span>
+                    <span class="flex items-center gap-1 text-green-500"><span class="w-2 h-2 rounded-full bg-green-500"></span> Llama Active</span>
+                </div>
+            </div>
+            <div class="discord-window text-sm">
+                <div class="p-4 border-b border-black/20 bg-black/10 flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-[#ed4245]"></div>
+                    <div class="w-3 h-3 rounded-full bg-[#faa61a]"></div>
+                    <div class="w-3 h-3 rounded-full bg-[#3ba55c]"></div>
+                    <span class="ml-2 text-gray-400 font-bold text-[10px]">#general-chat</span>
+                </div>
+                <div class="p-5 space-y-6">
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-full bg-indigo-500 flex-shrink-0"></div>
+                        <div>
+                            <span class="font-bold text-white mr-1">User</span> <span class="text-[10px] text-gray-500">Today at 12:00</span>
+                            <p class="text-gray-300 mt-1">Explain quantum entanglement in 1 sentence.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-full bg-indigo-600 flex-shrink-0 flex items-center justify-center font-bold text-xs">dG</div>
+                        <div>
+                            <span class="font-bold text-white mr-1">discGPT</span><span class="bot-tag">BOT</span> <span class="text-[10px] text-gray-500">Today at 12:00</span>
+                            <p class="text-gray-300 mt-1">Quantum entanglement is a physical phenomenon where pairs or groups of particles are generated such that the state of each particle cannot be described independently of the others, even when separated by large distances.</p>
+                            <div class="mt-2 text-[9px] text-gray-600 font-bold uppercase tracking-wider italic">Processed via Backup Model #1 (Llama-3)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <div class="order-2 lg:order-1 discord-window text-sm">
+                <div class="p-4 border-b border-black/20 bg-black/10">
+                    <span class="text-gray-400 font-bold text-[10px]">#ai-zone (Auto-Reply Enabled)</span>
+                </div>
+                <div class="p-5 space-y-6">
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-full bg-pink-500 flex-shrink-0"></div>
+                        <div>
+                            <span class="font-bold text-white mr-1">Member</span> <span class="text-[10px] text-gray-500">Today at 12:05</span>
+                            <p class="text-gray-300 mt-1 italic">"Anyone know a good coding tip?"</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 rounded-full bg-indigo-600 flex-shrink-0 flex items-center justify-center font-bold text-xs">dG</div>
+                        <div>
+                            <span class="font-bold text-white mr-1">discGPT</span><span class="bot-tag">BOT</span> <span class="text-[10px] text-gray-500">Today at 12:05</span>
+                            <p class="text-gray-300 mt-1">Always use clear, descriptive variable names. It's better to have <code>totalUserCount</code> than just <code>n</code>. Your future self will thank you!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="order-1 lg:order-2">
+                <h3 class="text-2xl font-bold mb-4 text-pink-400">Zero-Command Automation</h3>
+                <p class="text-gray-400 leading-relaxed">
+                    Why use <code>/ask</code> when you can just talk? Unlimited users can designate channels where the bot responds to <strong>every</strong> message. It turns your server into a living, breathing intelligent hub.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="container mx-auto px-6 py-24">
+        <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <!-- Free -->
+            <div class="p-8 rounded-3xl glass border-white/5 flex flex-col">
+                <h3 class="text-xl font-bold mb-1">Free</h3>
+                <p class="text-gray-500 mb-6 text-xs uppercase tracking-widest font-bold">Mistral Engine</p>
+                <div class="text-3xl font-black mb-8">$0 <span class="text-sm font-normal text-gray-600">/mo</span></div>
+                <ul class="space-y-4 mb-10 flex-grow text-sm text-gray-400 font-medium">
+                    <li>• Mistral Core</li>
+                    <li>• 0 Backups</li>
+                    <li>• Server Channels Only</li>
+                </ul>
+                <button class="w-full py-4 rounded-xl border border-white/10 hover:bg-white/5 transition font-bold uppercase text-xs">Select Free</button>
+            </div>
+
+            <!-- Plus -->
+            <div class="p-8 rounded-3xl glass border-indigo-500/30 bg-indigo-500/5 flex flex-col scale-105 shadow-2xl">
+                <h3 class="text-xl font-bold mb-1 text-indigo-400">Plus</h3>
+                <p class="text-gray-400 mb-6 text-xs uppercase tracking-widest font-bold">Llama Engine</p>
+                <div class="text-3xl font-black mb-8">Free <span class="text-sm font-normal text-gray-600">(Request)</span></div>
+                <ul class="space-y-4 mb-10 flex-grow text-sm text-gray-300 font-medium">
+                    <li>• Llama Core</li>
+                    <li>• 1 Backup Failover</li>
+                    <li>• 5 DMs / Day</li>
+                </ul>
+                <button class="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 transition font-bold uppercase text-xs">Request Access</button>
+            </div>
+
+            <!-- Unlimited -->
+            <div class="p-8 rounded-3xl border border-transparent nitro-gradient flex flex-col h-full text-white relative shadow-2xl">
+                <h3 class="text-xl font-bold mb-1">Unlimited</h3>
+                <p class="text-white/70 mb-6 text-xs uppercase tracking-widest font-bold">Gemini 3 Flash</p>
+                <div class="text-3xl font-black mb-8">Nitro <span class="text-sm font-normal text-white/50">Gift</span></div>
+                <ul class="space-y-4 mb-10 flex-grow text-sm font-bold">
+                    <li>✓ Gemini 3 Flash</li>
+                    <li>✓ ∞ Backups</li>
+                    <li>✓ 15 DMs / Day</li>
+                </ul>
+                <button class="w-full py-4 rounded-xl bg-white text-indigo-600 hover:bg-gray-100 transition font-black uppercase text-xs">GIFT NITRO</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison Table -->
+    <section id="comparison" class="container mx-auto px-6 py-24 border-t border-white/5">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-black mb-4 uppercase italic">Feature Matrix</h2>
+            <div class="flex justify-center gap-4 text-2xl font-black mb-2 tracking-[0.3em]">
+                <span class="text-gray-600">✓✓✓</span>
+                <span class="text-gray-500">-✓✓</span>
+                <span class="text-gray-400">--✓</span>
+            </div>
+        </div>
+
+        <div class="max-w-4xl mx-auto glass rounded-3xl overflow-hidden border border-white/10">
+            <table class="w-full text-center border-collapse">
+                <thead>
+                    <tr class="bg-white/5 text-[10px] uppercase tracking-[0.2em] font-black">
+                        <th class="py-8 px-8 text-left text-gray-500">Tier Features</th>
+                        <th class="py-8 px-4">Free</th>
+                        <th class="py-8 px-4">Plus</th>
+                        <th class="py-8 px-4 text-indigo-400">Unlimited</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm font-medium">
+                    <tr class="border-b border-white/5">
+                        <td class="py-4 px-8 text-left">Auto-Reply Channels</td>
+                        <td class="py-4 px-4 dash">—</td>
+                        <td class="py-4 px-4 dash">—</td>
+                        <td class="py-4 px-4 check">✓</td>
+                    </tr>
+                    <tr class="border-b border-white/5">
+                        <td class="py-4 px-8 text-left">Failover Backups</td>
+                        <td class="py-4 px-4 dash">0</td>
+                        <td class="py-4 px-4 font-bold text-gray-300">1</td>
+                        <td class="py-4 px-4 check font-black">∞</td>
+                    </tr>
+                    <tr class="border-b border-white/5">
+                        <td class="py-4 px-8 text-left">Private DM Limit</td>
+                        <td class="py-4 px-4 dash">0</td>
+                        <td class="py-4 px-4 font-bold text-gray-300">5</td>
+                        <td class="py-4 px-4 check font-black">15</td>
+                    </tr>
+                    <tr class="border-b border-white/5">
+                        <td class="py-4 px-8 text-left">Primary Engine</td>
+                        <td class="py-4 px-4 text-gray-500">Mistral</td>
+                        <td class="py-4 px-4 text-gray-300">Llama</td>
+                        <td class="py-4 px-4 check font-bold text-indigo-400">Gemini 3</td>
+                    </tr>
+                    <tr class="border-b border-white/5">
+                        <td class="py-4 px-8 text-left">Custom Footer / No Ads</td>
+                        <td class="py-4 px-4 dash">—</td>
+                        <td class="py-4 px-4 dash">—</td>
+                        <td class="py-4 px-4 check">✓</td>
+                    </tr>
+                    <tr class="border-b border-white/5">
+                        <td class="py-4 px-8 text-left">Vision Analysis</td>
+                        <td class="py-4 px-4 dash">—</td>
+                        <td class="py-4 px-4 check">✓</td>
+                        <td class="py-4 px-4 check">✓</td>
+                    </tr>
+                    <tr class="border-b border-white/5">
+                        <td class="py-4 px-8 text-left">Web Search</td>
+                        <td class="py-4 px-4 dash">—</td>
+                        <td class="py-4 px-4 check">✓</td>
+                        <td class="py-4 px-4 check">✓</td>
+                    </tr>
+                    <tr class="border-b border-white/5">
+                        <td class="py-4 px-8 text-left">Response Priority</td>
+                        <td class="py-4 px-4 dash">Low</td>
+                        <td class="py-4 px-4 text-gray-300">High</td>
+                        <td class="py-4 px-4 check font-bold">Ultra</td>
+                    </tr>
+                    <tr class="border-b border-white/5">
+                        <td class="py-4 px-8 text-left">Unlimited Quota</td>
+                        <td class="py-4 px-4 dash">—</td>
+                        <td class="py-4 px-4 dash">—</td>
+                        <td class="py-4 px-4 check">✓</td>
+                    </tr>
+                    <tr class="border-b border-white/5">
+                        <td class="py-4 px-8 text-left">Voice Integration</td>
+                        <td class="py-4 px-4 dash">—</td>
+                        <td class="py-4 px-4 dash">—</td>
+                        <td class="py-4 px-4 check">✓</td>
+                    </tr>
+                    <tr class="border-b border-white/5">
+                        <td class="py-4 px-8 text-left">Personalized Memes</td>
+                        <td class="py-4 px-4 dash">—</td>
+                        <td class="py-4 px-4 check">✓</td>
+                        <td class="py-4 px-4 check">✓</td>
+                    </tr>
+                    <tr class="border-b border-white/5">
+                        <td class="py-4 px-8 text-left">Model Manual Choice</td>
+                        <td class="py-4 px-4 dash">—</td>
+                        <td class="py-4 px-4 check">✓</td>
+                        <td class="py-4 px-4 check">✓</td>
+                    </tr>
+                    <tr class="border-b border-white/5">
+                        <td class="py-4 px-8 text-left">Code Interpreter</td>
+                        <td class="py-4 px-4 dash">—</td>
+                        <td class="py-4 px-4 dash">—</td>
+                        <td class="py-4 px-4 check">✓</td>
+                    </tr>
+                    <tr class="border-b border-white/5">
+                        <td class="py-4 px-8 text-left">Thread Memory</td>
+                        <td class="py-4 px-4 dash">Short</td>
+                        <td class="py-4 px-4 check">Medium</td>
+                        <td class="py-4 px-4 check font-bold">Long</td>
+                    </tr>
+                    <tr>
+                        <td class="py-4 px-8 text-left">Alpha Test Access</td>
+                        <td class="py-4 px-4 dash">—</td>
+                        <td class="py-4 px-4 dash">—</td>
+                        <td class="py-4 px-4 check">✓</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 py-12 bg-black/40 text-center">
+        <p class="text-gray-600 text-[10px] font-bold uppercase tracking-widest mb-4">
+            Activate Unlimited by gifting Nitro to the developer.
+        </p>
+        <div class="flex justify-center gap-8 text-xs text-gray-500">
+            <a href="#" class="hover:text-white transition">Privacy</a>
+            <a href="#" class="hover:text-white transition">Terms</a>
+            <a href="#" class="hover:text-white transition">Status</a>
+        </div>
+    </footer>
+
+</body>
+</html>
+
