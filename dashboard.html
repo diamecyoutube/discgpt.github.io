@@ -1,149 +1,264 @@
-<?php
-session_start();
-// UPDATE THESE FOR YOUR HOSTING
-$BOT_URL = "http://YOUR_BOT_IP:21187"; 
-$WEB_API_KEY = "bohNFcIumG0hWxp6E8l8b08nubQklL1GURibpKLtAVpUpslFzn";
-
-if (isset($_GET['logout'])) { session_destroy(); header("Location: dashboard.php"); exit; }
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>discGPT | Neural Console</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>discGPT | Control Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Fira Code', monospace; background: #050505; color: #00ff41; }
-        .terminal-border { border: 1px solid #00ff41; }
-        .log-DELETE { color: #ff3e3e; background: rgba(255,0,0,0.1); border-left: 2px solid #ff3e3e; padding-left: 5px; }
-        .cursor { display: inline-block; width: 8px; height: 18px; background: #00ff41; animation: blink 1s infinite; vertical-align: middle; }
-        @keyframes blink { 50% { opacity: 0; } }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #0b0e14; 
+            color: #f3f4f6;
+        }
+        .console-font { font-family: 'JetBrains Mono', monospace; }
+        
+        .glass-panel { 
+            background: rgba(30, 31, 34, 0.6); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255,255,255,0.05); 
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .server-card {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .server-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        /* Console styling */
+        .terminal-box { background-color: #09090b; }
+        .log-entry { margin-bottom: 4px; padding-left: 10px; border-left: 2px solid transparent; }
+        .log-sys { color: #a1a1aa; border-left-color: #52525b; }
+        .log-exec { color: #fbbf24; border-left-color: #fbbf24; }
+        .log-success { color: #4ade80; border-left-color: #4ade80; }
+        .log-error { color: #f87171; border-left-color: #f87171; background: rgba(248, 113, 113, 0.05); }
+
+        .hide { display: none !important; }
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="p-4">
+<body class="min-h-screen flex flex-col items-center">
 
-<?php if (!isset($_SESSION['user'])): ?>
-    <div class="flex items-center justify-center min-h-screen">
-        <div class="terminal-border p-8 bg-black w-96 text-center">
-            <h1 class="text-2xl mb-6 font-bold uppercase tracking-widest">> AUTH_REQUIRED</h1>
-            <input type="password" id="passIn" class="w-full bg-black border border-[#00ff41] p-3 mb-4 outline-none text-center">
-            <button onclick="login()" class="w-full bg-[#00ff41] text-black font-bold py-3 hover:bg-white transition">CONNECT</button>
-        </div>
-    </div>
-    <script>
-        async function login() {
-            const p = document.getElementById('passIn').value;
-            const res = await fetch(`<?= $BOT_URL ?>/auth?key=<?= $WEB_API_KEY ?>&pass=${p}`);
-            const data = await res.json();
-            if (data.type) {
-                const fd = new FormData(); fd.append('type', data.type); fd.append('username', data.username); fd.append('pass', p);
-                await fetch('sync.php', { method: 'POST', body: fd });
-                window.location.reload();
-            } else alert("Invalid Fragment");
-        }
-    </script>
-<?php else: ?>
-    <div class="grid grid-cols-12 gap-4 h-[90vh]">
-        <!-- Sidebar -->
-        <div class="col-span-3 terminal-border p-4 overflow-y-auto bg-black">
-            <p class="text-[10px] opacity-50 mb-4">> NODE_LIST</p>
-            <div id="guildList" class="space-y-2"></div>
-        </div>
-
-        <!-- Terminal -->
-        <div class="col-span-9 flex flex-col gap-4">
-            <div class="flex-1 terminal-border bg-black flex flex-col overflow-hidden">
-                <div class="bg-[#00ff41] text-black text-[10px] px-2 py-1 flex justify-between font-bold">
-                    <span>NEURAL_CONSO_STREAM.EXE</span>
-                    <span id="nodeName">AWAITING_UPLINK...</span>
-                </div>
-                <div id="conOut" class="flex-1 p-4 overflow-y-auto text-xs space-y-1">
-                    <p class="opacity-40">> discGPT Neural Link v2.5 initialized.</p>
-                </div>
-                <div class="p-3 border-t border-[#00ff41] flex gap-2">
-                    <span class="font-bold">></span>
-                    <input type="text" id="conIn" class="flex-1 bg-transparent outline-none" placeholder="Type 'help'..." onkeydown="if(event.key==='Enter') sendCmd()">
-                    <div class="cursor"></div>
-                </div>
+    <!-- LOGIN SCREEN -->
+    <div id="login-view" class="w-full max-w-md mt-24 px-6 fade-in">
+        <div class="glass-panel p-10 rounded-[2rem] shadow-2xl text-center">
+            <div class="mb-6 mx-auto h-16 w-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center rotate-3 shadow-lg shadow-indigo-500/20">
+                <span class="text-3xl font-black text-white">DG</span>
             </div>
-
-            <div class="grid grid-cols-4 gap-4">
-                <button onclick="sendRaw('help')" class="terminal-border p-2 text-[10px] hover:bg-[#00ff41] hover:text-black">PROTOCOLS</button>
-                <button onclick="sendRaw('status')" class="terminal-border p-2 text-[10px] hover:bg-[#00ff41] hover:text-black">STATUS</button>
-                <button onclick="document.getElementById('conOut').innerHTML=''" class="terminal-border p-2 text-[10px]">CLEAR</button>
-                <a href="?logout=1" class="terminal-border p-2 text-[10px] text-red-500 text-center">EXIT</a>
+            <h1 class="text-3xl font-black mb-2 tracking-tight">disc<span class="gradient-text">GPT</span></h1>
+            <p class="text-gray-400 text-xs font-semibold uppercase tracking-widest mb-8">Access Portal</p>
+            
+            <input type="password" id="auth-key" placeholder="Enter Access Key" 
+                class="w-full bg-black/50 p-4 rounded-xl outline-none border border-white/10 focus:border-indigo-500 transition text-center console-font mb-4">
+            
+            <button onclick="login()" id="login-btn"
+                class="w-full bg-white text-black py-4 rounded-xl font-bold hover:bg-gray-200 transition-all shadow-xl active:scale-95">
+                Connect
+            </button>
+            
+            <p id="login-error" class="text-red-400 text-sm mt-4 hide font-semibold"></p>
+            
+            <div class="mt-8 pt-6 border-t border-white/5 flex flex-col items-center">
+                <div class="flex items-center space-x-2">
+                    <span id="ping-indicator" class="h-2 w-2 rounded-full bg-yellow-500 animate-pulse"></span>
+                    <span id="ping-text" class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Checking Bot Link...</span>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- MAIN DASHBOARD -->
+    <div id="dashboard-view" class="w-full max-w-6xl mx-auto p-6 lg:p-12 hide fade-in">
+        
+        <!-- Dashboard Header -->
+        <header class="flex justify-between items-center mb-10 pb-6 border-b border-white/5">
+            <div>
+                <h1 class="text-2xl font-black tracking-tight flex items-center gap-3">
+                    <span class="h-3 w-3 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e]"></span>
+                    Welcome, <span id="display-name" class="gradient-text">User</span>
+                </h1>
+                <p class="text-sm text-gray-400 mt-1">Select a server below to enter Console Mode.</p>
+            </div>
+            <button onclick="location.reload()" class="bg-white/5 hover:bg-red-500/10 hover:text-red-400 text-gray-300 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border border-white/10 hover:border-red-500/20">
+                Logout
+            </button>
+        </header>
+
+        <!-- Admin: Provisioning Tools -->
+        <div id="admin-panel" class="hide mb-10 glass-panel p-6 rounded-2xl border border-indigo-500/30">
+            <h2 class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                Root Administration (diamec mode)
+            </h2>
+            <div class="flex flex-col md:flex-row gap-4">
+                <input type="text" id="admin-gid" placeholder="Target Server ID" class="flex-1 bg-black/50 p-3 rounded-xl border border-white/10 outline-none focus:border-indigo-500 font-mono text-sm">
+                <select id="admin-tier" class="bg-black/50 p-3 rounded-xl border border-white/10 outline-none font-semibold text-sm cursor-pointer">
+                    <option value="Free">Tier: Free</option>
+                    <option value="Plus">Tier: Plus</option>
+                    <option value="Unlimited">Tier: Unlimited</option>
+                </select>
+                <button onclick="updateServerTier()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-6 rounded-xl transition">
+                    Update Server
+                </button>
+            </div>
+            <p id="admin-msg" class="text-xs mt-3 font-semibold"></p>
+        </div>
+
+        <!-- Server Grid -->
+        <h2 class="text-lg font-bold mb-4">Your Linked Servers</h2>
+        <div id="server-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Populated via JS -->
+        </div>
+    </div>
+
+    <!-- CONSOLE VIEW (Hidden by default) -->
+    <div id="console-view" class="w-full max-w-5xl mx-auto p-6 lg:p-12 hide fade-in h-screen flex flex-col">
+        
+        <header class="flex justify-between items-center mb-6">
+            <div>
+                <button onclick="exitConsole()" class="text-gray-400 hover:text-white flex items-center gap-2 mb-2 text-sm font-semibold transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    Back to Dashboard
+                </button>
+                <h1 class="text-2xl font-black flex items-center gap-3">
+                    <span id="active-server-name">Server Name</span>
+                    <span class="bg-indigo-500/20 text-indigo-400 text-[10px] px-2 py-1 rounded-md uppercase tracking-widest">Console Mode</span>
+                </h1>
+            </div>
+        </header>
+
+        <!-- The actual terminal UI inside the modern page -->
+        <div class="flex-1 terminal-box rounded-2xl border border-white/10 shadow-2xl flex flex-col overflow-hidden">
+            <!-- Terminal Header -->
+            <div class="bg-white/5 px-4 py-2 border-b border-white/10 flex items-center justify-between text-xs console-font text-gray-400">
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
+                </div>
+                <span>discGPT/bash (secure link)</span>
+            </div>
+
+            <!-- Terminal Output -->
+            <div id="term-out" class="flex-1 p-4 overflow-y-auto console-font text-sm text-gray-300 space-y-1">
+                <div class="log-sys mb-4">
+                    discGPT Console Engine v3.0<br>
+                    Type <span class="text-white font-bold">help</span> to view all 15 protocol commands.<br>
+                    Connected to node.
+                </div>
+            </div>
+
+            <!-- Terminal Input -->
+            <div class="bg-white/5 p-4 border-t border-white/10 flex items-center gap-3">
+                <span class="console-font text-indigo-400 font-bold">></span>
+                <input type="text" id="term-in" class="flex-1 bg-transparent outline-none console-font text-white" 
+                    placeholder="Enter command (e.g., ban 123456789)..." onkeydown="if(event.key==='Enter') executeCommand()">
+            </div>
+        </div>
+    </div>
+
     <script>
-        let curG = null;
-        const KEY = "<?= $WEB_API_KEY ?>";
+        const BOT_URL = "http://fi13.bot-hosting.cloud:21187"; 
+        const API_KEY = "bohNFcIumG0hWxp6E8l8b08nubQklL1GURibpKLtAVpUpslFzn";
+        let sessionPass = "";
+        let activeGuildId = null;
 
-        async function loadGuilds() {
-            const res = await fetch(`<?= $BOT_URL ?>/guilds?key=${KEY}`);
-            const data = await res.json();
-            const list = document.getElementById('guildList');
-            list.innerHTML = "";
-            data.forEach(g => {
-                const d = document.createElement('div');
-                d.className = "p-2 border border-[#00ff41]/20 cursor-pointer hover:bg-[#00ff41]/10 text-xs";
-                d.onclick = () => { curG = g.id; document.getElementById('nodeName').innerText = g.name; log(`Link: ${g.name}`, 'cyan'); };
-                d.innerText = `> ${g.name}`;
-                list.appendChild(d);
-            });
-        }
-
-        function log(t, c='#00ff41', type='SYS') {
-            const o = document.getElementById('conOut');
-            const p = document.createElement('div');
-            p.className = `log-${type}`;
-            p.style.color = c;
-            p.innerText = `[${new Date().toLocaleTimeString()}] ${t}`;
-            o.appendChild(p);
-            o.scrollTop = o.scrollHeight;
-        }
-
-        async function pollLogs() {
-            if(!curG) return;
-            const res = await fetch(`<?= $BOT_URL ?>/logs/${curG}?key=${KEY}`);
-            const logs = await res.json();
-            logs.slice(-5).forEach(l => {
-                if(!document.getElementById(`l-${l.id}`)) {
-                    const d = document.createElement('div');
-                    d.id = `l-${l.id}`; d.className = `log-${l.type}`;
-                    d.innerText = `[${l.time}] ${l.content}`;
-                    document.getElementById('conOut').appendChild(d);
-                    document.getElementById('conOut').scrollTop = 99999;
+        // Auto-ping check on load
+        window.onload = async () => {
+            const ind = document.getElementById('ping-indicator');
+            const txt = document.getElementById('ping-text');
+            try {
+                const res = await fetch(`${BOT_URL}/ping`);
+                if(res.ok) {
+                    ind.className = "h-2 w-2 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e]";
+                    txt.innerText = "Bridge Online";
                 }
-            });
-        }
-
-        function sendRaw(v) { document.getElementById('conIn').value = v; sendCmd(); }
-
-        async function sendCmd() {
-            const i = document.getElementById('conIn');
-            const v = i.value; i.value = "";
-            if(v === 'help') {
-                log("--- PROTOCOLS ---", "white");
-                ["ban [id]", "kick [id]", "mute [id]", "purge [count]", "lock [id]", "unlock [id]", "nick [name]", "status", "info"].forEach(c => log("  " + c, "#888"));
-                return;
+            } catch(e) {
+                ind.className = "h-2 w-2 rounded-full bg-red-500";
+                txt.innerText = "Bridge Offline - Check Bot";
+                txt.classList.add('text-red-400');
             }
-            if(!curG) return log("ERR: SELECT NODE", "red");
-            log(`EXEC: ${v}`, "yellow");
-            const res = await fetch(`<?= $BOT_URL ?>/console/exec`, {
-                method:'POST', headers:{'Content-Type':'application/json'},
-                body: JSON.stringify({key: KEY, cmd: v, guildId: curG})
-            });
-            const d = await res.json();
-            if(d.success) log("OK: " + d.success);
-            if(d.error) log("ERR: " + d.error, "red");
+        };
+
+        async function login() {
+            const key = document.getElementById('auth-key').value;
+            const err = document.getElementById('login-error');
+            const btn = document.getElementById('login-btn');
+            
+            if(!key) return;
+            btn.innerText = "Authenticating...";
+            err.classList.add('hide');
+
+            try {
+                const response = await fetch(`${BOT_URL}/auth?key=${API_KEY}&pass=${key}`);
+                const data = await response.json();
+
+                if(response.ok) {
+                    sessionPass = key;
+                    document.getElementById('login-view').classList.add('hide');
+                    document.getElementById('dashboard-view').classList.remove('hide');
+                    document.getElementById('display-name').innerText = data.username;
+                    
+                    if(data.type === 'admin') {
+                        document.getElementById('admin-panel').classList.remove('hide');
+                    }
+                    loadServers();
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch(e) {
+                err.innerText = "Access Denied / Bridge Offline.";
+                err.classList.remove('hide');
+            }
+            btn.innerText = "Connect";
         }
 
-        loadGuilds();
-        setInterval(pollLogs, 2000);
-    </script>
-<?php endif; ?>
-</body>
-</html>
+        async function loadServers() {
+            const grid = document.getElementById('server-grid');
+            grid.innerHTML = "<p class='text-gray-500 col-span-3'>Scanning linked nodes...</p>";
+            
+            try {
+                const response = await fetch(`${BOT_URL}/guilds?key=${API_KEY}&pass=${sessionPass}`);
+                const guilds = await response.json();
+                
+                grid.innerHTML = "";
+                if(guilds.length === 0) {
+                    grid.innerHTML = "<p class='text-gray-500 col-span-3'>You don't share any servers with the bot, or lack access.</p>";
+                    return;
+                }
+
+                guilds.forEach(g => {
+                    const iconUrl = g.icon || "https://cdn.discordapp.com/embed/avatars/0.png";
+                    const tierColor = g.tier === 'Free' ? 'text-gray-400' : (g.tier === 'Plus' ? 'text-blue-400' : 'text-purple-400');
+                    
+                    grid.innerHTML += `
+                        <div onclick="enterConsole('${g.id}', '${g.name.replace(/'/g, "\\'")}')" class="glass-panel p-5 rounded-2xl server-card flex items-center gap-4">
+                            <img src="${iconUrl}" class="w-12 h-12 rounded-full border border-white/10" alt="Icon">
+                            <div class="flex-1">
+                                <h3 class="font-bold text-lg truncate">${g.name}</h3>
+                                <p class="text-xs font-semibold ${tierColor} uppercase tracking-widest mt-1">${g.tier} PLAN</p>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </div>
+                    `;
+                });
+            } catch(e) {
+                grid.innerHTML = "<p class='text-red-400 col-span-3'>Failed to fetch server list.</p>";
+            }
+        }
+
+        async function updateServerTier() {
+            const gid = document.getElementById
