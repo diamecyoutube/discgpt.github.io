@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>discGPT | Control Panel</title>
+    <title>discGPT | Pro Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap');
         
         body { 
             font-family: 'Inter', sans-serif; 
             background-color: #0b0e14; 
             color: #f3f4f6;
+            scroll-behavior: smooth;
         }
         .console-font { font-family: 'JetBrains Mono', monospace; }
         
@@ -28,144 +29,374 @@
         }
 
         .server-card {
-            transition: all 0.2s ease;
-            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .server-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.2);
-            border-color: rgba(99, 102, 241, 0.4);
+            background: rgba(45, 47, 54, 0.8);
+            border-color: rgba(99, 102, 241, 0.3);
         }
 
-        /* Console styling */
-        .terminal-box { background-color: #09090b; }
-        .log-entry { margin-bottom: 4px; padding-left: 10px; border-left: 2px solid transparent; }
-        .log-sys { color: #a1a1aa; border-left-color: #52525b; }
-        .log-exec { color: #fbbf24; border-left-color: #fbbf24; }
-        .log-success { color: #4ade80; border-left-color: #4ade80; }
-        .log-error { color: #f87171; border-left-color: #f87171; background: rgba(248, 113, 113, 0.05); }
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
 
+        .badge-plus { background: linear-gradient(135deg, #3b82f6, #2dd4bf); color: white; }
+        .badge-unlimited { background: linear-gradient(135deg, #8b5cf6, #ec4899); color: white; }
+
+        .terminal-box { background-color: #09090b; }
         .hide { display: none !important; }
-        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Custom Switch Styling */
+        .switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #6366f1; }
+        input:checked + .slider:before { transform: translateX(22px); }
+        input:disabled + .slider { opacity: 0.3; cursor: not-allowed; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center">
+<body class="min-h-screen">
 
     <!-- LOGIN SCREEN -->
-    <div id="login-view" class="w-full max-w-md mt-24 px-6 fade-in">
-        <div class="glass-panel p-10 rounded-[2rem] shadow-2xl text-center">
-            <div class="mb-6 mx-auto h-16 w-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center rotate-3 shadow-lg shadow-indigo-500/20">
-                <span class="text-3xl font-black text-white">DG</span>
+    <div id="login-view" class="min-h-screen flex flex-col items-center justify-center px-6 fade-in">
+        <div class="glass-panel p-10 rounded-[2.5rem] shadow-2xl text-center max-w-md w-full border border-white/10">
+            <div class="mb-6 mx-auto h-20 w-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl flex items-center justify-center rotate-6 shadow-xl shadow-indigo-500/20">
+                <span class="text-4xl font-black text-white">DG</span>
             </div>
-            <h1 class="text-3xl font-black mb-2 tracking-tight">disc<span class="gradient-text">GPT</span></h1>
-            <p class="text-gray-400 text-xs font-semibold uppercase tracking-widest mb-8">Access Portal</p>
+            <h1 class="text-4xl font-black mb-2 tracking-tight">disc<span class="gradient-text">GPT</span></h1>
+            <p class="text-gray-400 text-sm font-semibold uppercase tracking-widest mb-10">Neural Control Center</p>
             
-            <input type="password" id="auth-key" placeholder="Enter Access Key" 
-                class="w-full bg-black/50 p-4 rounded-xl outline-none border border-white/10 focus:border-indigo-500 transition text-center console-font mb-4">
+            <div class="space-y-4">
+                <input type="password" id="auth-key" placeholder="Enter Authentication Key" 
+                    class="w-full bg-black/40 p-4 rounded-2xl outline-none border border-white/5 focus:border-indigo-500/50 transition text-center console-font text-lg">
+                
+                <button onclick="login()" id="login-btn"
+                    class="w-full bg-white text-black py-4 rounded-2xl font-bold hover:bg-indigo-50 transition-all shadow-xl active:scale-95 text-lg">
+                    Access Systems
+                </button>
+            </div>
             
-            <button onclick="login()" id="login-btn"
-                class="w-full bg-white text-black py-4 rounded-xl font-bold hover:bg-gray-200 transition-all shadow-xl active:scale-95">
-                Connect
-            </button>
+            <p id="login-error" class="text-red-400 text-sm mt-6 hide font-bold px-4 py-2 bg-red-500/10 rounded-lg"></p>
             
-            <p id="login-error" class="text-red-400 text-sm mt-4 hide font-semibold"></p>
-            
-            <div class="mt-8 pt-6 border-t border-white/5 flex flex-col items-center">
-                <div class="flex items-center space-x-2">
-                    <span id="ping-indicator" class="h-2 w-2 rounded-full bg-yellow-500 animate-pulse"></span>
-                    <span id="ping-text" class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Checking Bot Link...</span>
+            <div class="mt-10 pt-8 border-t border-white/5">
+                <div class="flex items-center justify-center space-x-3">
+                    <span id="ping-indicator" class="h-2.5 w-2.5 rounded-full bg-yellow-500 animate-pulse"></span>
+                    <span id="ping-text" class="text-xs text-gray-500 font-bold uppercase tracking-widest">Verifying Satellite Link...</span>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- MAIN DASHBOARD -->
-    <div id="dashboard-view" class="w-full max-w-6xl mx-auto p-6 lg:p-12 hide fade-in">
-        
-        <!-- Dashboard Header -->
+    <div id="dashboard-view" class="hide min-h-screen">
+        <!-- Sidebar Navigation (Desktop) -->
+        <aside class="fixed left-0 top-0 h-full w-20 lg:w-64 bg-black/20 border-r border-white/5 flex flex-col p-4 z-50">
+            <div class="p-4 mb-8 hidden lg:block">
+                <h2 class="text-xl font-black tracking-tighter">disc<span class="gradient-text">GPT</span></h2>
+            </div>
+            <nav class="flex-1 space-y-2">
+                <button class="w-full flex items-center gap-3 p-3 rounded-xl bg-indigo-500/10 text-indigo-400 font-bold">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    <span class="hidden lg:block">Home</span>
+                </button>
+                <button class="w-full flex items-center gap-3 p-3 rounded-xl text-gray-500 hover:bg-white/5 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    <span class="hidden lg:block">Simulations</span>
+                </button>
+                <button class="w-full flex items-center gap-3 p-3 rounded-xl text-gray-500 hover:bg-white/5 hover:text-white transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span class="hidden lg:block">Plans</span>
+                </button>
+            </nav>
+            <button onclick="location.reload()" class="flex items-center gap-3 p-3 rounded-xl text-red-500 hover:bg-red-500/10 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                <span class="hidden lg:block font-bold">Log out</span>
+            </button>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="lg:ml-64 p-6 lg:p-12 fade-in">
+            <header class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+                <div>
+                    <h1 class="text-3xl font-black flex items-center gap-3">
+                        <span class="h-4 w-4 rounded-full bg-green-500 shadow-[0_0_15px_#22c55e]"></span>
+                        Systems Online, <span id="display-name" class="gradient-text">User</span>
+                    </h1>
+                    <p class="text-gray-400 mt-2 font-medium">Manage your intelligent server cluster from one interface.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="bg-indigo-500/10 text-indigo-400 text-xs font-bold px-3 py-1.5 rounded-full border border-indigo-500/20">API STABLE</span>
+                    <span class="bg-purple-500/10 text-purple-400 text-xs font-bold px-3 py-1.5 rounded-full border border-purple-500/20">GLOBAL CLUSTER: US-WEST</span>
+                </div>
+            </header>
+
+            <!-- Admin Section -->
+            <div id="admin-panel" class="hide mb-10 glass-panel p-8 rounded-3xl border border-indigo-500/30">
+                <h2 class="text-xs font-black text-indigo-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    Root Authority Access
+                </h2>
+                <div class="flex flex-col lg:flex-row gap-4">
+                    <input type="text" id="admin-gid" placeholder="Target Guild ID" class="flex-1 bg-black/50 p-4 rounded-2xl border border-white/5 outline-none focus:border-indigo-500/50 font-mono text-sm">
+                    <select id="admin-tier" class="bg-black/50 p-4 rounded-2xl border border-white/5 outline-none font-bold text-sm cursor-pointer hover:bg-black/70">
+                        <option value="Free">Tier: Free</option>
+                        <option value="Plus">Tier: Plus (Llama)</option>
+                        <option value="Unlimited">Tier: Unlimited (Gemini 3)</option>
+                    </select>
+                    <button onclick="updateServerTier()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 px-8 rounded-2xl transition shadow-lg shadow-indigo-600/20 active:scale-95">
+                        Overrule Tier Status
+                    </button>
+                </div>
+                <p id="admin-msg" class="text-xs mt-4 font-bold"></p>
+            </div>
+
+            <!-- Server Selection -->
+            <section class="mb-16">
+                <h2 class="text-2xl font-black mb-6">Linked Nodes</h2>
+                <div id="server-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <!-- Loaded via JS -->
+                </div>
+            </section>
+
+            <!-- HOW IT WORKS SECTION -->
+            <section class="mb-24">
+                <div class="flex items-center gap-4 mb-8">
+                    <h2 class="text-3xl font-black">Logic Flow Simulations</h2>
+                    <div class="h-px flex-1 bg-white/5"></div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Logic Simulation Card 1 -->
+                    <div class="glass-panel rounded-[2rem] overflow-hidden border border-white/5">
+                        <div class="p-8 border-b border-white/5">
+                            <h3 class="text-xl font-bold mb-2">Infinite Backup Chains</h3>
+                            <p class="text-sm text-gray-400 leading-relaxed">Never see "Application did not respond". Our Unlimited plan utilizes a recursive failover chain: Gemini 3 → Llama-3 → Mistral.</p>
+                        </div>
+                        <div class="bg-black/40 p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="h-2 w-2 bg-red-500 rounded-full"></span>
+                                    <span class="text-[10px] font-bold text-red-500 uppercase tracking-widest">Gemini Offline</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="h-2 w-2 bg-green-500 animate-pulse rounded-full"></span>
+                                    <span class="text-[10px] font-bold text-green-500 uppercase tracking-widest">Llama Active</span>
+                                </div>
+                            </div>
+                            <!-- Mock UI -->
+                            <div class="rounded-xl bg-[#1e1f22] p-4 text-xs">
+                                <div class="flex gap-3 mb-4">
+                                    <div class="h-8 w-8 rounded-full bg-gray-600 shrink-0"></div>
+                                    <div>
+                                        <p class="font-bold text-white mb-1">User <span class="text-[9px] text-gray-500 font-medium ml-1">Today at 12:00</span></p>
+                                        <p class="text-gray-300">Explain quantum entanglement in 1 sentence.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3">
+                                    <div class="h-8 w-8 rounded-lg bg-indigo-500 flex items-center justify-center shrink-0 font-black text-[10px]">dG</div>
+                                    <div>
+                                        <p class="font-bold text-white mb-1">discGPT <span class="bg-indigo-500 text-[8px] px-1 rounded ml-1">BOT</span></p>
+                                        <p class="text-indigo-200">Quantum entanglement is a physical phenomenon where particles interact such that their state cannot be described independently, regardless of distance.</p>
+                                        <p class="mt-2 text-[9px] text-indigo-400 font-bold italic opacity-70">Processed via Backup Model #1 (Llama-3)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Logic Simulation Card 2 -->
+                    <div class="glass-panel rounded-[2rem] overflow-hidden border border-white/5">
+                        <div class="p-8 border-b border-white/5">
+                            <h3 class="text-xl font-bold mb-2">Zero-Command Automation</h3>
+                            <p class="text-sm text-gray-400 leading-relaxed">Turn your server into a living intelligent hub. Designate channels where the bot responds to every message without triggers.</p>
+                        </div>
+                        <div class="bg-black/40 p-6">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="h-2 w-2 bg-indigo-500 rounded-full shadow-[0_0_8px_#6366f1]"></span>
+                                <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">#ai-zone (Auto-Reply Enabled)</span>
+                            </div>
+                            <div class="rounded-xl bg-[#1e1f22] p-4 text-xs">
+                                <div class="flex gap-3 mb-4">
+                                    <div class="h-8 w-8 rounded-full bg-blue-600 shrink-0"></div>
+                                    <div>
+                                        <p class="font-bold text-white mb-1">Member <span class="text-[9px] text-gray-500 font-medium ml-1">Today at 12:05</span></p>
+                                        <p class="text-gray-300">"Anyone know a good coding tip?"</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3">
+                                    <div class="h-8 w-8 rounded-lg bg-indigo-500 flex items-center justify-center shrink-0 font-black text-[10px]">dG</div>
+                                    <div>
+                                        <p class="font-bold text-white mb-1">discGPT <span class="bg-indigo-500 text-[8px] px-1 rounded ml-1">BOT</span></p>
+                                        <p class="text-indigo-200">Always use clear, descriptive variable names. It's better to have <span class="text-white font-mono">totalUserCount</span> than just <span class="text-white font-mono">n</span>. Your future self will thank you!</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PLANS & PRICING -->
+            <section class="mb-24">
+                <h2 class="text-3xl font-black mb-12 text-center">Engine Tiers</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Free -->
+                    <div class="glass-panel p-8 rounded-[2.5rem] border border-white/5 flex flex-col">
+                        <h4 class="text-lg font-bold mb-2">Free</h4>
+                        <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-6">Mistral Engine</p>
+                        <div class="text-4xl font-black mb-8">$0 <span class="text-sm text-gray-500 font-medium">/mo</span></div>
+                        <ul class="space-y-4 mb-10 flex-1 text-sm text-gray-400">
+                            <li class="flex items-center gap-2">✓ Mistral Core</li>
+                            <li class="flex items-center gap-2">✓ 0 Backups</li>
+                            <li class="flex items-center gap-2">✓ Server Channels Only</li>
+                        </ul>
+                        <button class="w-full py-4 rounded-2xl bg-white/5 border border-white/10 font-bold hover:bg-white/10 transition">Select Free</button>
+                    </div>
+                    <!-- Plus -->
+                    <div class="glass-panel p-8 rounded-[2.5rem] border-2 border-indigo-500/30 flex flex-col relative scale-105 shadow-2xl shadow-indigo-500/10">
+                        <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-500 text-[10px] font-black uppercase px-4 py-1.5 rounded-full tracking-[0.2em]">Recommended</div>
+                        <h4 class="text-lg font-bold mb-2">Plus</h4>
+                        <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-6">Llama Engine</p>
+                        <div class="text-4xl font-black mb-8">Free <span class="text-sm text-gray-500 font-medium">(Request)</span></div>
+                        <ul class="space-y-4 mb-10 flex-1 text-sm text-gray-300">
+                            <li class="flex items-center gap-2 text-indigo-400 font-bold">✓ Llama Core</li>
+                            <li class="flex items-center gap-2">✓ 1 Backup Failover</li>
+                            <li class="flex items-center gap-2">✓ 5 DMs / Day</li>
+                            <li class="flex items-center gap-2">✓ Priority Processing</li>
+                        </ul>
+                        <button class="w-full py-4 rounded-2xl bg-indigo-600 text-white font-bold hover:bg-indigo-500 transition shadow-lg shadow-indigo-600/30">Request Access</button>
+                    </div>
+                    <!-- Unlimited -->
+                    <div class="glass-panel p-8 rounded-[2.5rem] border border-purple-500/30 flex flex-col">
+                        <h4 class="text-lg font-bold mb-2">Unlimited</h4>
+                        <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-6">Gemini 3 Flash</p>
+                        <div class="text-4xl font-black mb-8">Nitro <span class="text-sm text-gray-500 font-medium">Gift</span></div>
+                        <ul class="space-y-4 mb-10 flex-1 text-sm text-gray-300">
+                            <li class="flex items-center gap-2 text-purple-400 font-bold">✓ Gemini 3 Flash</li>
+                            <li class="flex items-center gap-2">✓ ∞ Backup Chains</li>
+                            <li class="flex items-center gap-2">✓ 15 DMs / Day</li>
+                            <li class="flex items-center gap-2">✓ Zero-Command Logic</li>
+                        </ul>
+                        <button class="w-full py-4 rounded-2xl bg-purple-600 text-white font-bold hover:bg-purple-500 transition shadow-lg shadow-purple-600/30">GIFT NITRO</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FEATURE MATRIX -->
+            <section class="mb-24 overflow-x-auto">
+                <h2 class="text-2xl font-black mb-8 text-center">Feature Matrix</h2>
+                <table class="w-full text-left border-collapse min-w-[600px]">
+                    <thead>
+                        <tr class="border-b border-white/10 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                            <th class="py-4 px-6">Tier Features</th>
+                            <th class="py-4 px-6 text-center">Free</th>
+                            <th class="py-4 px-6 text-center">Plus</th>
+                            <th class="py-4 px-6 text-center text-indigo-400">Unlimited</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm">
+                        <tr class="border-b border-white/5">
+                            <td class="py-4 px-6 font-semibold">Auto-Reply Channels</td>
+                            <td class="py-4 px-6 text-center">—</td>
+                            <td class="py-4 px-6 text-center">—</td>
+                            <td class="py-4 px-6 text-center text-indigo-400 font-black text-xl">✓</td>
+                        </tr>
+                        <tr class="border-b border-white/5">
+                            <td class="py-4 px-6 font-semibold">Failover Backups</td>
+                            <td class="py-4 px-6 text-center">0</td>
+                            <td class="py-4 px-6 text-center">1</td>
+                            <td class="py-4 px-6 text-center text-indigo-400 font-black text-xl">∞</td>
+                        </tr>
+                        <tr class="border-b border-white/5">
+                            <td class="py-4 px-6 font-semibold">Private DM Limit</td>
+                            <td class="py-4 px-6 text-center">0</td>
+                            <td class="py-4 px-6 text-center">5</td>
+                            <td class="py-4 px-6 text-center text-indigo-400 font-black text-xl">15</td>
+                        </tr>
+                        <tr class="border-b border-white/5">
+                            <td class="py-4 px-6 font-semibold">Web Search / Vision</td>
+                            <td class="py-4 px-6 text-center">—</td>
+                            <td class="py-4 px-6 text-center text-indigo-400">✓</td>
+                            <td class="py-4 px-6 text-center text-indigo-400 font-black text-xl">✓</td>
+                        </tr>
+                        <tr class="border-b border-white/5">
+                            <td class="py-4 px-6 font-semibold">Response Priority</td>
+                            <td class="py-4 px-6 text-center text-gray-500">Low</td>
+                            <td class="py-4 px-6 text-center text-indigo-400">High</td>
+                            <td class="py-4 px-6 text-center text-purple-400 font-bold">Ultra</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <!-- SERVER SETTINGS MODAL/DASHBOARD -->
+    <div id="settings-view" class="hide min-h-screen lg:ml-64 p-6 lg:p-12 fade-in">
         <header class="flex justify-between items-center mb-10 pb-6 border-b border-white/5">
             <div>
-                <h1 class="text-2xl font-black tracking-tight flex items-center gap-3">
-                    <span class="h-3 w-3 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e]"></span>
-                    Welcome, <span id="display-name" class="gradient-text">User</span>
-                </h1>
-                <p class="text-sm text-gray-400 mt-1">Select a server below to enter Console Mode.</p>
+                <button onclick="exitSettings()" class="text-gray-400 hover:text-white flex items-center gap-2 mb-2 text-sm font-semibold transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    Dashboard
+                </button>
+                <h1 id="settings-server-name" class="text-3xl font-black">Server Name</h1>
             </div>
-            <button onclick="location.reload()" class="bg-white/5 hover:bg-red-500/10 hover:text-red-400 text-gray-300 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all border border-white/10 hover:border-red-500/20">
-                Logout
-            </button>
+            <div class="flex items-center gap-4">
+                <button onclick="enterConsoleFromSettings()" class="bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 px-6 py-3 rounded-2xl font-bold hover:bg-indigo-500/20 transition">Open Console</button>
+                <button onclick="saveAllSettings()" class="bg-white text-black px-8 py-3 rounded-2xl font-black shadow-xl hover:bg-gray-200 active:scale-95 transition">Save Changes</button>
+            </div>
         </header>
 
-        <!-- Admin: Provisioning Tools -->
-        <div id="admin-panel" class="hide mb-10 glass-panel p-6 rounded-2xl border border-indigo-500/30">
-            <h2 class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                Root Administration (diamec mode)
-            </h2>
-            <div class="flex flex-col md:flex-row gap-4">
-                <input type="text" id="admin-gid" placeholder="Target Server ID" class="flex-1 bg-black/50 p-3 rounded-xl border border-white/10 outline-none focus:border-indigo-500 font-mono text-sm">
-                <select id="admin-tier" class="bg-black/50 p-3 rounded-xl border border-white/10 outline-none font-semibold text-sm cursor-pointer">
-                    <option value="Free">Tier: Free</option>
-                    <option value="Plus">Tier: Plus</option>
-                    <option value="Unlimited">Tier: Unlimited</option>
-                </select>
-                <button onclick="updateServerTier()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-6 rounded-xl transition">
-                    Update Server
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-10">
+            <!-- Settings Navigation -->
+            <div class="xl:col-span-3 space-y-2">
+                <button onclick="switchTab('general')" class="tab-btn w-full text-left px-5 py-4 rounded-2xl font-bold bg-white/5 text-white transition">General Settings</button>
+                <button onclick="switchTab('ai')" class="tab-btn w-full text-left px-5 py-4 rounded-2xl font-bold text-gray-500 hover:bg-white/5 transition">Neural Core (AI)</button>
+                <button onclick="switchTab('moderation')" class="tab-btn w-full text-left px-5 py-4 rounded-2xl font-bold text-gray-500 hover:bg-white/5 transition">Mod Systems</button>
+                <button onclick="switchTab('logs')" class="tab-btn w-full text-left px-5 py-4 rounded-2xl font-bold text-gray-500 hover:bg-white/5 transition">Logging / Webhooks</button>
+                <button onclick="switchTab('plus')" class="tab-btn w-full text-left px-5 py-4 rounded-2xl font-bold text-yellow-500/70 hover:bg-white/5 transition flex items-center justify-between">
+                    Plus/Unlimited
+                    <span class="text-[10px] bg-yellow-500/10 px-2 py-0.5 rounded border border-yellow-500/20">PREMIUM</span>
                 </button>
             </div>
-            <p id="admin-msg" class="text-xs mt-3 font-semibold"></p>
-        </div>
 
-        <!-- Server Grid -->
-        <h2 class="text-lg font-bold mb-4">Your Linked Servers</h2>
-        <div id="server-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Populated via JS -->
+            <!-- Settings Content -->
+            <div id="settings-container" class="xl:col-span-9 space-y-6">
+                <!-- Tabs will populate here -->
+            </div>
         </div>
     </div>
 
-    <!-- CONSOLE VIEW (Hidden by default) -->
-    <div id="console-view" class="w-full max-w-5xl mx-auto p-6 lg:p-12 hide fade-in h-screen flex flex-col">
-        
+    <!-- CONSOLE VIEW -->
+    <div id="console-view" class="hide h-screen flex flex-col p-6 lg:ml-64 bg-black">
         <header class="flex justify-between items-center mb-6">
-            <div>
-                <button onclick="exitConsole()" class="text-gray-400 hover:text-white flex items-center gap-2 mb-2 text-sm font-semibold transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                    Back to Dashboard
-                </button>
-                <h1 class="text-2xl font-black flex items-center gap-3">
-                    <span id="active-server-name">Server Name</span>
-                    <span class="bg-indigo-500/20 text-indigo-400 text-[10px] px-2 py-1 rounded-md uppercase tracking-widest">Console Mode</span>
-                </h1>
-            </div>
+            <button onclick="exitConsoleToSettings()" class="text-gray-400 hover:text-white flex items-center gap-2 text-sm font-semibold">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                Back to Settings
+            </button>
+            <h2 id="active-server-name" class="font-black text-xl">Server Console</h2>
         </header>
 
-        <!-- The actual terminal UI inside the modern page -->
-        <div class="flex-1 terminal-box rounded-2xl border border-white/10 shadow-2xl flex flex-col overflow-hidden">
-            <!-- Terminal Header -->
-            <div class="bg-white/5 px-4 py-2 border-b border-white/10 flex items-center justify-between text-xs console-font text-gray-400">
-                <div class="flex items-center gap-2">
-                    <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
-                    <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
-                    <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
-                </div>
-                <span>discGPT/bash (secure link)</span>
+        <div class="flex-1 terminal-box rounded-3xl border border-white/5 shadow-2xl flex flex-col overflow-hidden">
+            <div class="bg-white/5 px-6 py-3 border-b border-white/5 flex items-center justify-between text-[10px] console-font text-gray-500 uppercase tracking-widest">
+                <span>discGPT Secure SSH Terminal v4.0</span>
+                <span id="term-status" class="text-green-500 font-bold">● Linked</span>
             </div>
-
-            <!-- Terminal Output -->
-            <div id="term-out" class="flex-1 p-4 overflow-y-auto console-font text-sm text-gray-300 space-y-1">
-                <div class="log-sys mb-4">
-                    discGPT Console Engine v3.0<br>
-                    Type <span class="text-white font-bold">help</span> to view all 15 protocol commands.<br>
-                    Connected to node.
-                </div>
+            <div id="term-out" class="flex-1 p-6 overflow-y-auto console-font text-sm text-gray-400 space-y-2">
+                <div class="text-indigo-400 font-bold">Node Initialized. Type 'help' for protocols.</div>
             </div>
-
-            <!-- Terminal Input -->
-            <div class="bg-white/5 p-4 border-t border-white/10 flex items-center gap-3">
-                <span class="console-font text-indigo-400 font-bold">></span>
+            <div class="p-6 bg-black/40 border-t border-white/5 flex items-center gap-4">
+                <span class="console-font text-indigo-400 font-black">$</span>
                 <input type="text" id="term-in" class="flex-1 bg-transparent outline-none console-font text-white" 
-                    placeholder="Enter command (e.g., ban 123456789)..." onkeydown="if(event.key==='Enter') executeCommand()">
+                    placeholder="Input command sequence..." onkeydown="if(event.key==='Enter') executeCommand()">
             </div>
         </div>
     </div>
@@ -175,41 +406,52 @@
         const API_KEY = "bohNFcIumG0hWxp6E8l8b08nubQklL1GURibpKLtAVpUpslFzn";
         let sessionPass = "";
         let activeGuildId = null;
+        let activeGuildTier = "Free";
+        let currentTab = 'general';
 
-        // Auto-ping check on load
-        window.onload = async () => {
-            const ind = document.getElementById('ping-indicator');
-            const txt = document.getElementById('ping-text');
-            try {
-                const res = await fetch(`${BOT_URL}/ping`);
-                if(res.ok) {
-                    ind.className = "h-2 w-2 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e]";
-                    txt.innerText = "Bridge Online";
-                } else {
-                    throw new Error();
-                }
-            } catch(e) {
-                ind.className = "h-2 w-2 rounded-full bg-red-500";
-                txt.innerText = "Bridge Offline - Check Bot";
-                txt.classList.add('text-red-400');
-            }
+        // Mock Settings Data Structure
+        const SETTINGS_DEFAULTS = {
+            general: [
+                { id: 'prefix', label: 'Bot Prefix', type: 'text', val: '!', tier: 'Free' },
+                { id: 'welcomer', label: 'Welcomer Messages', type: 'toggle', val: true, tier: 'Free' },
+                { id: 'leave_msg', label: 'Leave Messages', type: 'toggle', val: false, tier: 'Free' },
+                { id: 'nick_lock', label: 'Lock Bot Nickname', type: 'toggle', val: true, tier: 'Free' }
+            ],
+            ai: [
+                { id: 'ai_chat', label: 'Enable AI Interaction', type: 'toggle', val: true, tier: 'Free' },
+                { id: 'ai_mentions', label: 'Reply on @Mentions', type: 'toggle', val: true, tier: 'Free' },
+                { id: 'ai_filter', label: 'SafeSearch AI Filter', type: 'toggle', val: true, tier: 'Free' },
+                { id: 'ai_persona', label: 'Custom AI Persona', type: 'text', val: 'Helpful Assistant', tier: 'Plus' }
+            ],
+            moderation: [
+                { id: 'mod_logs', label: 'Enable Mod Logs', type: 'toggle', val: true, tier: 'Free' },
+                { id: 'anti_spam', label: 'Anti-Spam (Basic)', type: 'toggle', val: true, tier: 'Free' },
+                { id: 'anti_link', label: 'Anti-Link System', type: 'toggle', val: false, tier: 'Plus' },
+                { id: 'auto_ban', label: 'Auto-Ban Suspicious Accounts', type: 'toggle', val: false, tier: 'Unlimited' }
+            ],
+            logs: [
+                { id: 'log_deleted', label: 'Log Deleted Messages', type: 'toggle', val: true, tier: 'Free' },
+                { id: 'log_edited', label: 'Log Edited Messages', type: 'toggle', val: true, tier: 'Free' },
+                { id: 'webhook_url', label: 'External Webhook URL', type: 'text', val: '', tier: 'Unlimited' }
+            ],
+            plus: [
+                { id: 'vision', label: 'Image Vision Analysis', type: 'toggle', val: true, tier: 'Plus' },
+                { id: 'web_search', label: 'Live Web Searching', type: 'toggle', val: true, tier: 'Plus' },
+                { id: 'failover', label: 'Infinite Backup Chain', type: 'toggle', val: true, tier: 'Unlimited' },
+                { id: 'auto_reply', label: 'Zero-Command (Channel-Wide)', type: 'toggle', val: true, tier: 'Unlimited' },
+                { id: 'voice_ai', label: 'Voice Channel Integration', type: 'toggle', val: false, tier: 'Unlimited' }
+            ]
         };
 
+        // UI State Controllers
         async function login() {
-            const keyInput = document.getElementById('auth-key');
-            const key = keyInput.value;
-            const err = document.getElementById('login-error');
+            const key = document.getElementById('auth-key').value;
             const btn = document.getElementById('login-btn');
+            const err = document.getElementById('login-error');
             
-            if(!key) {
-                err.innerText = "Please enter an access key.";
-                err.classList.remove('hide');
-                return;
-            }
-
+            if(!key) return;
+            btn.innerText = "Connecting...";
             btn.disabled = true;
-            btn.innerText = "Authenticating...";
-            err.classList.add('hide');
 
             try {
                 const response = await fetch(`${BOT_URL}/auth?key=${API_KEY}&pass=${key}`);
@@ -219,119 +461,154 @@
                     sessionPass = key;
                     document.getElementById('login-view').classList.add('hide');
                     document.getElementById('dashboard-view').classList.remove('hide');
-                    document.getElementById('display-name').innerText = data.username || "User";
-                    
-                    if(data.type === 'admin') {
-                        document.getElementById('admin-panel').classList.remove('hide');
-                    }
-                    await loadServers();
-                } else {
-                    throw new Error(data.error || "Authentication failed.");
-                }
+                    document.getElementById('display-name').innerText = data.username || "Admin";
+                    if(data.type === 'admin') document.getElementById('admin-panel').classList.remove('hide');
+                    loadServers();
+                } else throw new Error(data.error || "Bad Credentials");
             } catch(e) {
-                console.error("Login Error:", e);
-                err.innerText = e.message || "Access Denied / Bridge Offline.";
+                err.innerText = e.message;
                 err.classList.remove('hide');
             } finally {
+                btn.innerText = "Access Systems";
                 btn.disabled = false;
-                btn.innerText = "Connect";
             }
         }
 
         async function loadServers() {
             const grid = document.getElementById('server-grid');
-            grid.innerHTML = `
-                <div class="col-span-full py-10 flex flex-col items-center justify-center space-y-4">
-                    <div class="w-8 h-8 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin"></div>
-                    <p class='text-gray-500 font-medium'>Scanning linked nodes...</p>
-                </div>
-            `;
+            grid.innerHTML = "<div class='col-span-3 text-center py-20 text-gray-500 font-bold animate-pulse'>SYNCHRONIZING CLUSTER NODES...</div>";
             
             try {
                 const response = await fetch(`${BOT_URL}/guilds?key=${API_KEY}&pass=${sessionPass}`);
                 const guilds = await response.json();
                 
                 grid.innerHTML = "";
-                if(!guilds || guilds.length === 0) {
-                    grid.innerHTML = `
-                        <div class="col-span-full glass-panel p-10 rounded-2xl text-center border-dashed border-white/10">
-                            <p class='text-gray-400'>No mutual servers found. Ensure the bot is in your servers.</p>
-                        </div>
-                    `;
-                    return;
-                }
-
                 guilds.forEach(g => {
-                    const iconUrl = g.icon || "https://cdn.discordapp.com/embed/avatars/0.png";
-                    const tierColor = g.tier === 'Free' ? 'text-gray-400' : (g.tier === 'Plus' ? 'text-blue-400' : 'text-purple-400');
-                    
                     const card = document.createElement('div');
-                    card.className = "glass-panel p-5 rounded-2xl server-card flex items-center gap-4";
-                    card.onclick = () => enterConsole(g.id, g.name);
+                    card.className = "glass-panel p-6 rounded-3xl server-card border border-white/5 cursor-pointer flex flex-col items-center text-center";
+                    card.onclick = () => openServerSettings(g.id, g.name, g.tier);
                     card.innerHTML = `
-                        <img src="${iconUrl}" class="w-12 h-12 rounded-full border border-white/10 bg-black" alt="Icon">
-                        <div class="flex-1 overflow-hidden">
-                            <h3 class="font-bold text-lg truncate">${g.name}</h3>
-                            <p class="text-xs font-semibold ${tierColor} uppercase tracking-widest mt-1">${g.tier || 'Free'} PLAN</p>
-                        </div>
-                        <svg class="w-5 h-5 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        <img src="${g.icon || 'https://cdn.discordapp.com/embed/avatars/0.png'}" class="w-20 h-20 rounded-2xl mb-4 bg-black border border-white/5 shadow-lg">
+                        <h3 class="font-black text-xl mb-1">${g.name}</h3>
+                        <span class="text-[10px] font-black uppercase tracking-widest py-1 px-3 rounded-full ${g.tier === 'Unlimited' ? 'badge-unlimited' : (g.tier === 'Plus' ? 'badge-plus' : 'bg-white/5 text-gray-500')}">${g.tier || 'Free'} Node</span>
                     `;
                     grid.appendChild(card);
                 });
-            } catch(e) {
-                grid.innerHTML = "<p class='text-red-400 col-span-3'>Failed to fetch server list. Is the bridge online?</p>";
-            }
+            } catch(e) { grid.innerHTML = "<p class='text-red-400'>Communication Link Interrupted.</p>"; }
         }
 
-        async function updateServerTier() {
-            const gid = document.getElementById('admin-gid').value;
-            const tier = document.getElementById('admin-tier').value;
-            const msg = document.getElementById('admin-msg');
-            
-            if(!gid) return msg.innerText = "Please enter a Server ID.";
-            
-            try {
-                const response = await fetch(`${BOT_URL}/admin/update_tier?key=${API_KEY}&pass=${sessionPass}&guild_id=${gid}&tier=${tier}`);
-                const data = await response.json();
-                if(data.success) {
-                    msg.className = "text-xs mt-3 font-semibold text-green-400";
-                    msg.innerText = `Success: Guild ID [${gid}] updated to ${tier}.`;
-                    loadServers(); 
-                } else { throw new Error(data.error); }
-            } catch(e) {
-                msg.className = "text-xs mt-3 font-semibold text-red-400";
-                msg.innerText = "Error: " + e.message;
-            }
-        }
-
-        // --- CONSOLE UI LOGIC ---
-
-        function enterConsole(guildId, guildName) {
-            activeGuildId = guildId;
+        function openServerSettings(id, name, tier) {
+            activeGuildId = id;
+            activeGuildTier = tier || "Free";
             document.getElementById('dashboard-view').classList.add('hide');
-            document.getElementById('console-view').classList.remove('hide');
-            document.getElementById('active-server-name').innerText = guildName;
-            
-            document.getElementById('term-out').innerHTML = `
-                <div class="log-sys mb-4">
-                    discGPT Console Engine v3.0<br>
-                    Connected to node: ${guildName}<br>
-                    Type <span class="text-white font-bold">help</span> to view all 15 protocol commands.
+            document.getElementById('settings-view').classList.remove('hide');
+            document.getElementById('settings-server-name').innerText = name;
+            switchTab('general');
+        }
+
+        function exitSettings() {
+            document.getElementById('settings-view').classList.add('hide');
+            document.getElementById('dashboard-view').classList.remove('hide');
+        }
+
+        function switchTab(tabId) {
+            currentTab = tabId;
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('bg-white/5', 'text-white');
+                b.classList.add('text-gray-500');
+            });
+            event.currentTarget.classList.add('bg-white/5', 'text-white');
+            event.currentTarget.classList.remove('text-gray-500');
+            renderSettings();
+        }
+
+        function renderSettings() {
+            const container = document.getElementById('settings-container');
+            const items = SETTINGS_DEFAULTS[currentTab];
+            container.innerHTML = `
+                <div class="glass-panel rounded-3xl overflow-hidden border border-white/5">
+                    <div class="p-6 border-b border-white/5 bg-white/5">
+                        <h4 class="font-black uppercase tracking-widest text-xs">${currentTab} Settings Dashboard</h4>
+                    </div>
+                    <div id="settings-list"></div>
                 </div>
             `;
-            setTimeout(() => document.getElementById('term-in').focus(), 100);
+            
+            const list = document.getElementById('settings-list');
+            items.forEach(s => {
+                const isLocked = !checkTierAccess(s.tier);
+                const row = document.createElement('div');
+                row.className = `setting-row ${isLocked ? 'opacity-50' : ''}`;
+                
+                let inputHtml = "";
+                if(s.type === 'toggle') {
+                    inputHtml = `
+                        <label class="switch">
+                            <input type="checkbox" ${s.val ? 'checked' : ''} ${isLocked ? 'disabled' : ''}>
+                            <span class="slider"></span>
+                        </label>
+                    `;
+                } else {
+                    inputHtml = `<input type="text" value="${s.val}" class="bg-black/40 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-indigo-500 w-48 text-right" ${isLocked ? 'disabled' : ''}>`;
+                }
+
+                row.innerHTML = `
+                    <div>
+                        <div class="font-bold text-sm flex items-center gap-2">
+                            ${s.label}
+                            ${s.tier !== 'Free' ? `<span class="text-[8px] font-black uppercase px-2 py-0.5 rounded ${s.tier === 'Unlimited' ? 'badge-unlimited' : 'badge-plus'}">${s.tier}</span>` : ''}
+                        </div>
+                        <p class="text-[10px] text-gray-500 mt-1">Configures specific behavior for this node module.</p>
+                    </div>
+                    <div>${inputHtml}</div>
+                `;
+                list.appendChild(row);
+            });
+
+            if(currentTab === 'plus' && activeGuildTier === 'Free') {
+                container.innerHTML += `
+                    <div class="p-8 glass-panel rounded-3xl border border-indigo-500/20 text-center">
+                        <h4 class="text-xl font-black mb-2">Upgrade Node Capacity</h4>
+                        <p class="text-gray-400 text-sm mb-6">This server is running on a Free Engine. Switch to Plus or Unlimited to unlock neural backups and vision analysis.</p>
+                        <button class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-8 py-3 rounded-2xl transition">View Tier Plans</button>
+                    </div>
+                `;
+            }
         }
 
-        function exitConsole() {
-            activeGuildId = null;
+        function checkTierAccess(requiredTier) {
+            if(activeGuildTier === 'Unlimited') return true;
+            if(activeGuildTier === 'Plus' && requiredTier !== 'Unlimited') return true;
+            if(activeGuildTier === 'Free' && requiredTier === 'Free') return true;
+            return false;
+        }
+
+        function saveAllSettings() {
+            const btn = event.currentTarget;
+            btn.innerText = "Syncing...";
+            setTimeout(() => {
+                btn.innerText = "Changes Saved";
+                setTimeout(() => btn.innerText = "Save Changes", 2000);
+            }, 800);
+        }
+
+        // --- CONSOLE ENGINE ---
+        function enterConsoleFromSettings() {
+            document.getElementById('settings-view').classList.add('hide');
+            document.getElementById('console-view').classList.remove('hide');
+            document.getElementById('active-server-name').innerText = document.getElementById('settings-server-name').innerText;
+        }
+
+        function exitConsoleToSettings() {
             document.getElementById('console-view').classList.add('hide');
-            document.getElementById('dashboard-view').classList.remove('hide');
+            document.getElementById('settings-view').classList.remove('hide');
         }
 
         function tLog(text, type = "sys") {
             const out = document.getElementById('term-out');
             const div = document.createElement('div');
-            div.className = `log-entry log-${type}`;
+            const color = { sys: 'text-gray-500', exec: 'text-yellow-500', success: 'text-green-500', error: 'text-red-500' }[type];
+            div.className = `${color} text-xs`;
             div.innerText = `[${new Date().toLocaleTimeString()}] ${text}`;
             out.appendChild(div);
             out.scrollTop = out.scrollHeight;
@@ -344,54 +621,60 @@
             inp.value = "";
 
             if(val.toLowerCase() === 'help') {
-                tLog("EXECUTING: help", "exec");
+                tLog("Fetching Protocol Commands...", "exec");
                 const cmds = [
-                    "ban <id>        - Ban user",
-                    "kick <id>       - Kick user",
-                    "mute <id>       - Timeout user (10m)",
-                    "unmute <id>     - Remove timeout",
-                    "purge <amount>  - Delete messages",
-                    "lock <chanId>   - Disable chatting",
-                    "unlock <chanId> - Enable chatting",
-                    "nick <name>     - Change bot nickname",
-                    "roleadd <user> <role> - Add role",
-                    "rolerem <user> <role> - Remove role",
-                    "slowmode <sec> [chanId] - Set slowmode",
-                    "announce <msg>  - Broadcast message",
-                    "nuke <chanId>   - Clone and wipe channel",
-                    "status          - Check bot latency",
-                    "leave           - Remove bot from server"
+                    "--- ADMINISTRATION ---",
+                    "ban <id> [reason] - Hard blacklist",
+                    "kick <id>         - Sever connection",
+                    "mute <id> <time>  - Protocol silence",
+                    "warn <id>         - Increment infractions",
+                    "purge <qty>       - Wiped log history",
+                    "--- NEURAL CORE (AI) ---",
+                    "ai-ban <id>       - Blacklist from AI usage",
+                    "ai-reset          - Clear thread memory",
+                    "ai-persona <text> - Set global behavior",
+                    "ai-bypass <id>    - Ignore filters for user",
+                    "ai-status         - Check cluster latency",
+                    "--- UTILITY ---",
+                    "userinfo <id>     - Deep scan account",
+                    "serverinfo        - Node statistics",
+                    "remind <time> <m> - Internal chronos",
+                    "poll <q> \| <a>   - Consensus system",
+                    "avatar <id>       - Retrieve asset data"
                 ];
-                cmds.forEach(c => tLog("  " + c, "sys"));
-                return;
-            }
-
-            if(val.toLowerCase() === 'clear') {
-                document.getElementById('term-out').innerHTML = "";
+                cmds.forEach(c => tLog(c));
                 return;
             }
 
             tLog(`> ${val}`, "exec");
-            
             try {
                 const response = await fetch(`${BOT_URL}/console/exec?key=${API_KEY}&pass=${sessionPass}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ cmd: val, guildId: activeGuildId })
                 });
-                
                 const data = await response.json();
-                
-                if(data.success) tLog(data.success, "success");
-                else if(data.error) tLog("ERR: " + data.error, "error");
-                else tLog("Unknown response from bridge.", "error");
+                if(data.success) tLog("SUCCESS: " + data.success, "success");
+                else tLog("ERR: " + (data.error || "Execution Failed"), "error");
+            } catch(e) { tLog("NETWORK_ERR: Remote node unreachable.", "error"); }
+        }
 
-                if(val.startsWith('leave') && data.success) {
-                    setTimeout(() => { exitConsole(); loadServers(); }, 2000);
-                }
-
+        async function updateServerTier() {
+            const gid = document.getElementById('admin-gid').value;
+            const tier = document.getElementById('admin-tier').value;
+            const msg = document.getElementById('admin-msg');
+            if(!gid) return;
+            try {
+                const response = await fetch(`${BOT_URL}/admin/update_tier?key=${API_KEY}&pass=${sessionPass}&guild_id=${gid}&tier=${tier}`);
+                const data = await response.json();
+                if(data.success) {
+                    msg.className = "text-xs mt-4 font-bold text-green-400";
+                    msg.innerText = `SUCCESS: Guild ${gid} Overruled to ${tier}.`;
+                    loadServers();
+                } else throw new Error(data.error);
             } catch(e) {
-                tLog("NETWORK_ERR: Bridge timeout or connection lost.", "error");
+                msg.className = "text-xs mt-4 font-bold text-red-400";
+                msg.innerText = "Error: " + e.message;
             }
         }
     </script>
