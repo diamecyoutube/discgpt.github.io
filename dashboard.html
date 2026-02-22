@@ -185,6 +185,8 @@
                 if(res.ok) {
                     ind.className = "h-2 w-2 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e]";
                     txt.innerText = "Bridge Online";
+                } else {
+                    throw new Error();
                 }
             } catch(e) {
                 ind.className = "h-2 w-2 rounded-full bg-red-500";
@@ -194,11 +196,18 @@
         };
 
         async function login() {
-            const key = document.getElementById('auth-key').value;
+            const keyInput = document.getElementById('auth-key');
+            const key = keyInput.value;
             const err = document.getElementById('login-error');
             const btn = document.getElementById('login-btn');
             
-            if(!key) return;
+            if(!key) {
+                err.innerText = "Please enter an access key.";
+                err.classList.remove('hide');
+                return;
+            }
+
+            btn.disabled = true;
             btn.innerText = "Authenticating...";
             err.classList.add('hide');
 
@@ -206,37 +215,49 @@
                 const response = await fetch(`${BOT_URL}/auth?key=${API_KEY}&pass=${key}`);
                 const data = await response.json();
 
-                if(response.ok) {
+                if (response.ok && !data.error) {
                     sessionPass = key;
                     document.getElementById('login-view').classList.add('hide');
                     document.getElementById('dashboard-view').classList.remove('hide');
-                    document.getElementById('display-name').innerText = data.username;
+                    document.getElementById('display-name').innerText = data.username || "User";
                     
                     if(data.type === 'admin') {
                         document.getElementById('admin-panel').classList.remove('hide');
                     }
-                    loadServers();
+                    await loadServers();
                 } else {
-                    throw new Error(data.error);
+                    throw new Error(data.error || "Authentication failed.");
                 }
             } catch(e) {
-                err.innerText = "Access Denied / Bridge Offline.";
+                console.error("Login Error:", e);
+                err.innerText = e.message || "Access Denied / Bridge Offline.";
                 err.classList.remove('hide');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Connect";
             }
-            btn.innerText = "Connect";
         }
 
         async function loadServers() {
             const grid = document.getElementById('server-grid');
-            grid.innerHTML = "<p class='text-gray-500 col-span-3'>Scanning linked nodes...</p>";
+            grid.innerHTML = `
+                <div class="col-span-full py-10 flex flex-col items-center justify-center space-y-4">
+                    <div class="w-8 h-8 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin"></div>
+                    <p class='text-gray-500 font-medium'>Scanning linked nodes...</p>
+                </div>
+            `;
             
             try {
                 const response = await fetch(`${BOT_URL}/guilds?key=${API_KEY}&pass=${sessionPass}`);
                 const guilds = await response.json();
                 
                 grid.innerHTML = "";
-                if(guilds.length === 0) {
-                    grid.innerHTML = "<p class='text-gray-500 col-span-3'>You don't share any servers with the bot, or lack access.</p>";
+                if(!guilds || guilds.length === 0) {
+                    grid.innerHTML = `
+                        <div class="col-span-full glass-panel p-10 rounded-2xl text-center border-dashed border-white/10">
+                            <p class='text-gray-400'>No mutual servers found. Ensure the bot is in your servers.</p>
+                        </div>
+                    `;
                     return;
                 }
 
@@ -244,21 +265,135 @@
                     const iconUrl = g.icon || "https://cdn.discordapp.com/embed/avatars/0.png";
                     const tierColor = g.tier === 'Free' ? 'text-gray-400' : (g.tier === 'Plus' ? 'text-blue-400' : 'text-purple-400');
                     
-                    grid.innerHTML += `
-                        <div onclick="enterConsole('${g.id}', '${g.name.replace(/'/g, "\\'")}')" class="glass-panel p-5 rounded-2xl server-card flex items-center gap-4">
-                            <img src="${iconUrl}" class="w-12 h-12 rounded-full border border-white/10" alt="Icon">
-                            <div class="flex-1">
-                                <h3 class="font-bold text-lg truncate">${g.name}</h3>
-                                <p class="text-xs font-semibold ${tierColor} uppercase tracking-widest mt-1">${g.tier} PLAN</p>
-                            </div>
-                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    const card = document.createElement('div');
+                    card.className = "glass-panel p-5 rounded-2xl server-card flex items-center gap-4";
+                    card.onclick = () => enterConsole(g.id, g.name);
+                    card.innerHTML = `
+                        <img src="${iconUrl}" class="w-12 h-12 rounded-full border border-white/10 bg-black" alt="Icon">
+                        <div class="flex-1 overflow-hidden">
+                            <h3 class="font-bold text-lg truncate">${g.name}</h3>
+                            <p class="text-xs font-semibold ${tierColor} uppercase tracking-widest mt-1">${g.tier || 'Free'} PLAN</p>
                         </div>
+                        <svg class="w-5 h-5 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                     `;
+                    grid.appendChild(card);
                 });
             } catch(e) {
-                grid.innerHTML = "<p class='text-red-400 col-span-3'>Failed to fetch server list.</p>";
+                grid.innerHTML = "<p class='text-red-400 col-span-3'>Failed to fetch server list. Is the bridge online?</p>";
             }
         }
 
         async function updateServerTier() {
-            const gid = document.getElementById
+            const gid = document.getElementById('admin-gid').value;
+            const tier = document.getElementById('admin-tier').value;
+            const msg = document.getElementById('admin-msg');
+            
+            if(!gid) return msg.innerText = "Please enter a Server ID.";
+            
+            try {
+                const response = await fetch(`${BOT_URL}/admin/update_tier?key=${API_KEY}&pass=${sessionPass}&guild_id=${gid}&tier=${tier}`);
+                const data = await response.json();
+                if(data.success) {
+                    msg.className = "text-xs mt-3 font-semibold text-green-400";
+                    msg.innerText = `Success: Guild ID [${gid}] updated to ${tier}.`;
+                    loadServers(); 
+                } else { throw new Error(data.error); }
+            } catch(e) {
+                msg.className = "text-xs mt-3 font-semibold text-red-400";
+                msg.innerText = "Error: " + e.message;
+            }
+        }
+
+        // --- CONSOLE UI LOGIC ---
+
+        function enterConsole(guildId, guildName) {
+            activeGuildId = guildId;
+            document.getElementById('dashboard-view').classList.add('hide');
+            document.getElementById('console-view').classList.remove('hide');
+            document.getElementById('active-server-name').innerText = guildName;
+            
+            document.getElementById('term-out').innerHTML = `
+                <div class="log-sys mb-4">
+                    discGPT Console Engine v3.0<br>
+                    Connected to node: ${guildName}<br>
+                    Type <span class="text-white font-bold">help</span> to view all 15 protocol commands.
+                </div>
+            `;
+            setTimeout(() => document.getElementById('term-in').focus(), 100);
+        }
+
+        function exitConsole() {
+            activeGuildId = null;
+            document.getElementById('console-view').classList.add('hide');
+            document.getElementById('dashboard-view').classList.remove('hide');
+        }
+
+        function tLog(text, type = "sys") {
+            const out = document.getElementById('term-out');
+            const div = document.createElement('div');
+            div.className = `log-entry log-${type}`;
+            div.innerText = `[${new Date().toLocaleTimeString()}] ${text}`;
+            out.appendChild(div);
+            out.scrollTop = out.scrollHeight;
+        }
+
+        async function executeCommand() {
+            const inp = document.getElementById('term-in');
+            const val = inp.value.trim();
+            if(!val) return;
+            inp.value = "";
+
+            if(val.toLowerCase() === 'help') {
+                tLog("EXECUTING: help", "exec");
+                const cmds = [
+                    "ban <id>        - Ban user",
+                    "kick <id>       - Kick user",
+                    "mute <id>       - Timeout user (10m)",
+                    "unmute <id>     - Remove timeout",
+                    "purge <amount>  - Delete messages",
+                    "lock <chanId>   - Disable chatting",
+                    "unlock <chanId> - Enable chatting",
+                    "nick <name>     - Change bot nickname",
+                    "roleadd <user> <role> - Add role",
+                    "rolerem <user> <role> - Remove role",
+                    "slowmode <sec> [chanId] - Set slowmode",
+                    "announce <msg>  - Broadcast message",
+                    "nuke <chanId>   - Clone and wipe channel",
+                    "status          - Check bot latency",
+                    "leave           - Remove bot from server"
+                ];
+                cmds.forEach(c => tLog("  " + c, "sys"));
+                return;
+            }
+
+            if(val.toLowerCase() === 'clear') {
+                document.getElementById('term-out').innerHTML = "";
+                return;
+            }
+
+            tLog(`> ${val}`, "exec");
+            
+            try {
+                const response = await fetch(`${BOT_URL}/console/exec?key=${API_KEY}&pass=${sessionPass}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cmd: val, guildId: activeGuildId })
+                });
+                
+                const data = await response.json();
+                
+                if(data.success) tLog(data.success, "success");
+                else if(data.error) tLog("ERR: " + data.error, "error");
+                else tLog("Unknown response from bridge.", "error");
+
+                if(val.startsWith('leave') && data.success) {
+                    setTimeout(() => { exitConsole(); loadServers(); }, 2000);
+                }
+
+            } catch(e) {
+                tLog("NETWORK_ERR: Bridge timeout or connection lost.", "error");
+            }
+        }
+    </script>
+</body>
+</html>
